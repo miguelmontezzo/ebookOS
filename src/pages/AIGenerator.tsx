@@ -52,7 +52,7 @@ export default function AIGenerator() {
                 if (geminiKey) {
                     const imageAi = new GoogleGenAI({ apiKey: geminiKey });
                     const imageResponse = await imageAi.models.generateContent({
-                        model: 'gemini-2.0-flash-exp',
+                        model: 'gemini-2.0-flash-preview-image-generation',
                         contents: `Generate a cinematic, minimalist, highly professional and beautiful book cover image about "${theme}". The image should be a stunning visual background with subtle thematic elements. Do NOT include any text, title, or words in the image. Only beautiful abstract or thematic visual elements. Vertical portrait orientation.`,
                         config: {
                             responseModalities: ['image', 'text'],
