@@ -10,7 +10,7 @@ import ColorPicker from '../components/ColorPicker';
 export default function AdminEbookManager() {
     const { id } = useParams();
     const [ebook, setEbook] = useState<any>(null);
-    const [activeTab, setActiveTab] = useState<'alunos' | 'regras' | 'config'>('alunos');
+    const [activeTab, setActiveTab] = useState<'alunos' | 'regras' | 'conteudo' | 'config'>('alunos');
     const [loading, setLoading] = useState(true);
 
     // Alunos State
@@ -25,6 +25,12 @@ export default function AdminEbookManager() {
     const [newModuloNome, setNewModuloNome] = useState('');
     const [newDiasLiberacao, setNewDiasLiberacao] = useState('');
     const [isAddingRegra, setIsAddingRegra] = useState(false);
+
+    // Conteúdo State
+    const [contentModules, setContentModules] = useState<any[]>([]);
+    const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
+    const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+    const [isSavingContent, setIsSavingContent] = useState(false);
 
     // Config State
     const [editTitle, setEditTitle] = useState('');
@@ -57,14 +63,17 @@ export default function AdminEbookManager() {
                 // Carrega Regras
                 await fetchRegras();
 
-                // Carrega nomes dos módulos do JSON original (para manter a ordem fixa)
-                if (!EBOOK_MODULES[ebookData.slug]) {
-                    const { data: contentData } = await supabase
-                        .from('ebook_contents')
-                        .select('content_json')
-                        .eq('ebook_id', ebookData.id)
-                        .single();
-                    if (contentData?.content_json) {
+                // Carrega conteúdo JSON para editor + nomes dinâmicos
+                const { data: contentData } = await supabase
+                    .from('ebook_contents')
+                    .select('content_json')
+                    .eq('ebook_id', ebookData.id)
+                    .single();
+
+                if (contentData?.content_json) {
+                    setContentModules(contentData.content_json);
+
+                    if (!EBOOK_MODULES[ebookData.slug]) {
                         const names = contentData.content_json.map((m: any) => m.module_name);
                         setDynamicModuleNames(names);
                     }
@@ -189,6 +198,56 @@ export default function AdminEbookManager() {
         }
     };
 
+    const updateModuleName = (moduleIndex: number, name: string) => {
+        setContentModules((prev) => prev.map((m, i) => i === moduleIndex ? { ...m, module_name: name } : m));
+    };
+
+    const updatePageTitle = (moduleIndex: number, pageIndex: number, title: string) => {
+        setContentModules((prev) => prev.map((m, i) => {
+            if (i !== moduleIndex) return m;
+            return {
+                ...m,
+                pages: m.pages.map((p: any, j: number) => j === pageIndex ? { ...p, title } : p)
+            };
+        }));
+    };
+
+    const updatePageContent = (moduleIndex: number, pageIndex: number, content: string) => {
+        setContentModules((prev) => prev.map((m, i) => {
+            if (i !== moduleIndex) return m;
+            return {
+                ...m,
+                pages: m.pages.map((p: any, j: number) => j === pageIndex ? { ...p, content } : p)
+            };
+        }));
+    };
+
+    const updateCoverBgUrl = (url: string) => {
+        setContentModules((prev) => prev.map((m, i) => {
+            if (i !== 0) return m;
+            return {
+                ...m,
+                pages: (m.pages || []).map((p: any, j: number) => j === 0 ? { ...p, cover_bg_url: url } : p)
+            };
+        }));
+    };
+
+    const handleSaveContent = async () => {
+        if (!id) return;
+        setIsSavingContent(true);
+        const { error } = await supabase
+            .from('ebook_contents')
+            .update({ content_json: contentModules, updated_at: new Date().toISOString() })
+            .eq('ebook_id', id);
+
+        if (error) {
+            alert('Erro ao salvar conteúdo: ' + error.message);
+        } else {
+            alert('Conteúdo do ebook atualizado com sucesso!');
+        }
+        setIsSavingContent(false);
+    };
+
     if (loading) return <div className="min-h-screen bg-zinc-900 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>;
     if (!ebook) return <div className="p-8 text-white">Ebook não encontrado.</div>;
 
@@ -224,6 +283,13 @@ export default function AdminEbookManager() {
                     >
                         <Lock className="w-5 h-5" />
                         Regras Drip Content ({regras.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('conteudo')}
+                        className={`pb-4 px-2 font-bold flex items-center justify-center sm:justify-start gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'conteudo' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-zinc-400 hover:text-zinc-200'}`}
+                    >
+                        <BookOpen className="w-5 h-5" />
+                        Editor de Conteúdo
                     </button>
                     <button
                         onClick={() => setActiveTab('config')}
@@ -405,6 +471,90 @@ export default function AdminEbookManager() {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                )}
+
+                {/* Tab: Conteúdo */}
+                {activeTab === 'conteudo' && (
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Editor de Conteúdo</h3>
+                            <p className="text-sm text-zinc-400">Edite módulos, títulos de páginas e o conteúdo completo (HTML) do ebook.</p>
+                        </div>
+
+                        {contentModules.length === 0 ? (
+                            <div className="text-zinc-500 bg-zinc-800/40 border border-zinc-700/40 rounded-2xl p-6">Nenhum conteúdo carregado para este ebook.</div>
+                        ) : (
+                            <div className="grid lg:grid-cols-3 gap-4">
+                                <div className="lg:col-span-1 bg-zinc-800/40 border border-zinc-700/50 rounded-2xl p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+                                    {contentModules.map((mod: any, mIdx: number) => (
+                                        <div key={mIdx} className="border border-zinc-700/50 rounded-xl p-3">
+                                            <input
+                                                value={mod.module_name || ''}
+                                                onChange={(e) => updateModuleName(mIdx, e.target.value)}
+                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white mb-2"
+                                            />
+                                            <div className="space-y-1">
+                                                {(mod.pages || []).map((p: any, pIdx: number) => (
+                                                    <button
+                                                        key={pIdx}
+                                                        onClick={() => {
+                                                            setSelectedModuleIndex(mIdx);
+                                                            setSelectedPageIndex(pIdx);
+                                                        }}
+                                                        className={`w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors ${selectedModuleIndex === mIdx && selectedPageIndex === pIdx ? 'bg-cyan-500/20 text-cyan-300' : 'text-zinc-300 hover:bg-zinc-700/40'}`}
+                                                    >
+                                                        {p.title || `Página ${pIdx + 1}`}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="lg:col-span-2 bg-zinc-800/40 border border-zinc-700/50 rounded-2xl p-4 space-y-4">
+                                    <div>
+                                        <label className="block text-xs text-zinc-400 mb-1">Título da página</label>
+                                        <input
+                                            value={contentModules?.[selectedModuleIndex]?.pages?.[selectedPageIndex]?.title || ''}
+                                            onChange={(e) => updatePageTitle(selectedModuleIndex, selectedPageIndex, e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white"
+                                        />
+                                    </div>
+
+                                    {selectedModuleIndex === 0 && selectedPageIndex === 0 && (
+                                        <div>
+                                            <label className="block text-xs text-zinc-400 mb-1">Imagem de fundo da capa (URL)</label>
+                                            <input
+                                                value={contentModules?.[0]?.pages?.[0]?.cover_bg_url || ''}
+                                                onChange={(e) => updateCoverBgUrl(e.target.value)}
+                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white"
+                                                placeholder="https://..."
+                                            />
+                                            <p className="text-[11px] text-zinc-500 mt-1">Salva no JSON da capa para customização visual.</p>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-xs text-zinc-400 mb-1">Conteúdo da página (HTML)</label>
+                                        <textarea
+                                            value={contentModules?.[selectedModuleIndex]?.pages?.[selectedPageIndex]?.content || ''}
+                                            onChange={(e) => updatePageContent(selectedModuleIndex, selectedPageIndex, e.target.value)}
+                                            className="w-full h-[420px] bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 font-mono text-xs"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveContent}
+                                        disabled={isSavingContent}
+                                        className="bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-bold px-6 py-3 rounded-xl inline-flex items-center gap-2 disabled:opacity-60"
+                                    >
+                                        {isSavingContent ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar conteúdo
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

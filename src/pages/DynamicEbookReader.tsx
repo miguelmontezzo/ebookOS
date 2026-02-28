@@ -16,6 +16,7 @@ interface FlatPage {
     moduleName: string;
     title: string;
     content: string;
+    coverBgUrl?: string;
 }
 
 export default function DynamicEbookReader() {
@@ -71,7 +72,8 @@ export default function DynamicEbookReader() {
                             index: i,
                             moduleName: mod.module_name,
                             title: page.title,
-                            content: page.content
+                            content: page.content,
+                            coverBgUrl: (page as any).cover_bg_url || undefined
                         });
                         i++;
                     });
@@ -126,6 +128,17 @@ export default function DynamicEbookReader() {
     const applyThemeColor = (html: string) => {
         if (themeColor === 'indigo') return html;
         return html.replaceAll('indigo', themeColor);
+    };
+
+    const getRenderedContent = () => {
+        let html = applyThemeColor(currentPage.content);
+        if (currentPage.coverBgUrl && currentPage.index === 0) {
+            html = html.replace(
+                'class="min-h-[70vh] flex flex-col items-center justify-center text-center bg-zinc-900 text-white rounded-3xl p-8 relative overflow-hidden"',
+                `class="min-h-[70vh] flex flex-col items-center justify-center text-center bg-zinc-900 text-white rounded-3xl p-8 relative overflow-hidden" style="background-image:url('${currentPage.coverBgUrl}');background-size:cover;background-position:center;"`
+            );
+        }
+        return html;
     };
 
     return (
@@ -291,7 +304,7 @@ export default function DynamicEbookReader() {
                                             'bulb-icon': () => <Lightbulb className="w-5 h-5 text-yellow-500 shrink-0 inline-block mr-2" />,
                                         } as any}
                                     >
-                                        {applyThemeColor(currentPage.content)}
+                                        {getRenderedContent()}
                                     </ReactMarkdown>
                                 </div>
                             </article>
