@@ -7,6 +7,7 @@ import MetodoEMPReader from './pages/MetodoEMPReader';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import ConfirmAccount from './pages/ConfirmAccount';
+import AdminAccount from './pages/AdminAccount';
 import AdminEbookManager from './pages/AdminEbookManager';
 import StudentLogin from './pages/StudentLogin';
 import AIGenerator from './pages/AIGenerator';
@@ -86,6 +87,9 @@ function App() {
                         } />
                         <Route path="/admin/ebook/:id" element={
                             <ProtectedAdminRoute><AdminEbookManager /></ProtectedAdminRoute>
+                        } />
+                        <Route path="/admin/account" element={
+                            <ProtectedAdminRoute><AdminAccount /></ProtectedAdminRoute>
                         } />
 
                         {/* ================ STUDENT ================ */}

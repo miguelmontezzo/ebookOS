@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Library, BookOpen, LogOut, Copy, ExternalLink, Loader2, Plus, Sparkles } from 'lucide-react';
+import { BookOpen, LogOut, Copy, ExternalLink, Loader2, Sparkles, UserCircle2 } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { supabase } from '../lib/supabase';
 import Logo from '../components/Logo';
@@ -58,13 +58,31 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                <button
-                    onClick={logout}
-                    className="flex items-center gap-2 px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
-                >
-                    <LogOut className="w-4 h-4" />
-                    Sair
-                </button>
+                <div className="flex items-center gap-2">
+                    <Link
+                        to="/admin/account"
+                        className="flex items-center gap-2 px-3 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                    >
+                        {user?.user_metadata?.avatar_url ? (
+                            <img
+                                src={user.user_metadata.avatar_url as string}
+                                alt="Avatar"
+                                className="w-5 h-5 rounded-full object-cover"
+                            />
+                        ) : (
+                            <UserCircle2 className="w-4 h-4" />
+                        )}
+                        Conta
+                    </Link>
+
+                    <button
+                        onClick={logout}
+                        className="flex items-center gap-2 px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Sair
+                    </button>
+                </div>
             </header>
 
             {/* Main Content */}
