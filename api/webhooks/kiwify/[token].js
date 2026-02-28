@@ -4,9 +4,25 @@ function randomPassword() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function normalizePayload(req) {
+  // Handles JSON, query-string tests (GET) and form-urlencoded posts.
+  if (req.method === 'GET') return req.query || {};
+
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      const params = new URLSearchParams(req.body);
+      return Object.fromEntries(params.entries());
+    }
+  }
+
+  return req.body || {};
+}
+
 export default async function handler(req, res) {
   try {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+    if (!['POST', 'GET'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
     assertSupabaseServerConfig();
 
     const { token } = req.query;
@@ -20,7 +36,7 @@ export default async function handler(req, res) {
 
     if (connErr || !connection) return res.status(404).json({ error: 'Webhook connection not found' });
 
-    const payload = req.body || {};
+    const payload = normalizePayload(req);
     const status = String(payload.status || payload.order_status || payload.event || 'received').toLowerCase();
     const eventType = String(payload.event || payload.type || payload.order_status || 'unknown');
 
