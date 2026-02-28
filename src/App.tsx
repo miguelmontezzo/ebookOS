@@ -6,6 +6,7 @@ import EbookReader from './pages/EbookReader';
 import MetodoEMPReader from './pages/MetodoEMPReader';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
+import ConfirmAccount from './pages/ConfirmAccount';
 import AdminEbookManager from './pages/AdminEbookManager';
 import StudentLogin from './pages/StudentLogin';
 import AIGenerator from './pages/AIGenerator';
@@ -75,6 +76,7 @@ function App() {
                         {/* ================= ADMIN ================= */}
                         <Route path="/admin/login" element={<AdminLogin />} />
                         <Route path="/admin/register" element={<AdminRegister />} />
+                        <Route path="/auth/confirm" element={<ConfirmAccount />} />
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/admin/dashboard" element={
                             <ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>
