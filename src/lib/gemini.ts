@@ -1,8 +1,10 @@
 import { GoogleGenAI, Type, Schema } from '@google/genai';
 
-// Initialize the SDK. We use process.env to not expose it on the client
-// but since this is Vite, the env var should be in vite.config.ts define section
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Extract key safely
+const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+
+// Initialize the SDK only if key exists to prevent browser crash
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export interface GeneratedPage {
     title: string;
@@ -52,6 +54,10 @@ const ebookSchema: Schema = {
  * Função responsável por chamar o Gemini, passar o contexto e retornar o Ebook já estruturado
  */
 export async function generateEbookContent(theme: string, targetAudience: string, baseText: string): Promise<GeneratedModule[]> {
+    if (!ai) {
+        throw new Error("Chave da API do Google Gemini não configurada. Por favor, adicione GEMINI_API_KEY='sua_chave' no arquivo .env na raiz do projeto e reinicie o servidor.");
+    }
+
     try {
         const systemInstruction = `Você é um copywriter e autor especialista em infoprodutos top de mercado. 
 Seu objetivo é criar a estrutura de módulos e todo o texto de um e-book altamente vendável, envolvente e interativo.
