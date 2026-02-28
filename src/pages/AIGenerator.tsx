@@ -43,11 +43,48 @@ export default function AIGenerator() {
         setError(null);
 
         try {
-            // 1. Generate Automatic Cover Image using Pollinations AI
-            setGenerationStep('Desenhando a capa do eBook...');
-            const encodedTheme = encodeURIComponent(`A cinematic, minimalist, highly professional and beautiful subtle book cover background about ${theme}. Only background texture and subtle elements, no text, no title.`);
-            const coverSeed = Math.floor(Math.random() * 10000000);
-            const coverUrl = `https://image.pollinations.ai/prompt/${encodedTheme}?seed=${coverSeed}&width=800&height=1200&nologo=true`;
+            // 1. Generate Automatic Cover Image using Gemini (NanoBanana Pro) + Upload to ImgBB
+            setGenerationStep('🎨 Desenhando a capa com Inteligência Artificial...');
+            let coverUrl = '';
+            try {
+                const { GoogleGenAI } = await import('@google/genai');
+                const geminiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+                if (geminiKey) {
+                    const imageAi = new GoogleGenAI({ apiKey: geminiKey });
+                    const imageResponse = await imageAi.models.generateContent({
+                        model: 'gemini-2.0-flash-exp',
+                        contents: `Generate a cinematic, minimalist, highly professional and beautiful book cover image about "${theme}". The image should be a stunning visual background with subtle thematic elements. Do NOT include any text, title, or words in the image. Only beautiful abstract or thematic visual elements. Vertical portrait orientation.`,
+                        config: {
+                            responseModalities: ['image', 'text'],
+                        }
+                    });
+
+                    // Extract base64 image from response
+                    const parts = imageResponse?.candidates?.[0]?.content?.parts;
+                    const imagePart = parts?.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'));
+
+                    if (imagePart?.inlineData?.data) {
+                        setGenerationStep('☁️ Fazendo upload da capa para a nuvem...');
+                        // Upload to ImgBB
+                        const imgbbFormData = new FormData();
+                        imgbbFormData.append('key', 'e800bc35127717cfeccbd47cc58a6c7a');
+                        imgbbFormData.append('image', imagePart.inlineData.data);
+                        imgbbFormData.append('name', `ebook-cover-${Date.now()}`);
+
+                        const imgbbResponse = await fetch('https://api.imgbb.com/1/upload', {
+                            method: 'POST',
+                            body: imgbbFormData,
+                        });
+
+                        const imgbbData = await imgbbResponse.json();
+                        if (imgbbData?.data?.url) {
+                            coverUrl = imgbbData.data.url;
+                        }
+                    }
+                }
+            } catch (imgErr) {
+                console.warn('Cover generation failed, proceeding without cover:', imgErr);
+            }
 
             // 2. Convert theme to slug
             setGenerationStep('Salvando Ebook no Banco de Dados...');
@@ -63,7 +100,7 @@ export default function AIGenerator() {
                 slug: slug,
                 description: `Ebook criado por Inteligência Artificial focado em ${audience}.`,
                 theme_color: 'indigo',
-                cover_url: coverUrl
+                cover_url: coverUrl || null
             }]).select().single();
 
             if (ebookError) throw ebookError;
