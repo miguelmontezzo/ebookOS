@@ -98,7 +98,7 @@ function App() {
 
                         {/* Fallback pattern for future automated ebooks */}
                         <Route path="/:slug" element={
-                            <ProtectedStudentRoute><EbookReader /></ProtectedStudentRoute>
+                            <ProtectedStudentRoute><DynamicEbookReader /></ProtectedStudentRoute>
                         } />
                     </Routes>
                 </Router>

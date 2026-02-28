@@ -145,7 +145,7 @@ export default function AdminEbookManager() {
             {/* Header */}
             <header className="bg-zinc-800/80 border-b border-zinc-700/50 px-6 py-4 sticky top-0 z-10 backdrop-blur-xl">
                 <div className="max-w-5xl mx-auto flex items-center gap-4">
-                    <Link to="/" className="p-2 -ml-2 hover:bg-zinc-700/50 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                    <Link to="/admin/dashboard" className="p-2 -ml-2 hover:bg-zinc-700/50 rounded-lg text-zinc-400 hover:text-white transition-colors">
                         <ChevronLeft className="w-6 h-6" />
                     </Link>
                     <BookOpen className={`w-8 h-8 text-${ebook.theme_color || 'emerald'}-500`} />
