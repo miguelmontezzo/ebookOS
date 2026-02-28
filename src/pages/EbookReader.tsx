@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, ChevronRight, ChevronLeft, BookOpen, Dumbbell, Utensils, TrendingUp, Activity, Lock, Loader2, LogOut } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronLeft, BookOpen, Dumbbell, Utensils, TrendingUp, Activity, Lock, Loader2, LogOut, Search } from 'lucide-react';
 import { Capa, Introducao, Diagnostico, Evolucao } from './Modulo1';
 import { Aquecimento } from './Modulo2';
 import { Treinos, AcademiaCheia } from './Modulo3';
@@ -37,6 +37,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [regras, setRegras] = useState<ModuloRegra[]>([]);
   const [loadingRegras, setLoadingRegras] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Fallback to "o-metodo" if on root slug mapping just to be safe with this fixed layout
   const currentSlug = slug || 'o-metodo';
@@ -86,10 +87,17 @@ export default function App() {
   };
   const prev = () => !isFirst && setCurrentIndex(c => c - 1);
 
-  // Group pages by module
-  const modules = PAGES.reduce((acc, page, index) => {
+  const filteredPages = PAGES.filter(page =>
+    page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    page.module.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Group filtered pages by module
+  const modules = filteredPages.reduce((acc, page) => {
+    // We will need the original index to navigate properly, so let's find it.
+    const originalIndex = PAGES.findIndex(p => p.id === page.id);
     if (!acc[page.module]) acc[page.module] = [];
-    acc[page.module].push({ ...page, index });
+    acc[page.module].push({ ...page, index: originalIndex });
     return acc;
   }, {} as Record<string, any[]>);
 
@@ -119,6 +127,19 @@ export default function App() {
           </button>
         </div>
 
+        <div className="p-4 border-b border-zinc-200">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Buscar no Ebook..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full bg-zinc-100 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 transition-shadow"
+            />
+          </div>
+        </div>
+
         <div className="flex-1 overflow-y-auto p-4">
           {loadingRegras ? (
             <div className="flex justify-center p-4"><Loader2 className="w-6 h-6 animate-spin text-zinc-400" /></div>
@@ -129,7 +150,7 @@ export default function App() {
 
               return (
                 <div key={moduleName} className="mb-6">
-                  <div className="flex justify-between items-center mb-3 px-2">
+                  <div className="flex flex-wrap justify-between items-center mb-3 px-2 gap-2">
                     <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{moduleName}</h3>
                     {isBlocked && (
                       <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -197,11 +218,17 @@ export default function App() {
             <div className="hidden md:block text-sm font-medium text-zinc-500">
               {PAGES[currentIndex].module} <span className="mx-2 text-zinc-300">/</span> <span className="text-zinc-900">{PAGES[currentIndex].title}</span>
             </div>
+            <div className="md:hidden text-sm font-bold text-zinc-900 truncate max-w-[150px] sm:max-w-[200px]">
+              {PAGES[currentIndex].title}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-zinc-500 mr-4">
+            <span className="hidden sm:inline-block text-sm font-medium text-zinc-500 mr-2 sm:mr-4">
               Página {currentIndex + 1} de {PAGES.length}
+            </span>
+            <span className="sm:hidden text-xs font-medium text-zinc-500 mr-2">
+              {currentIndex + 1}/{PAGES.length}
             </span>
             <button
               onClick={prev}
@@ -221,7 +248,7 @@ export default function App() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-white">
+        <main className="flex-1 overflow-y-auto bg-white px-0 md:px-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}

@@ -13,7 +13,7 @@ interface Ebook {
     theme_color: string;
 }
 
-export default function EbookOS() {
+export default function AdminDashboard() {
     const { logout, user } = useAdminAuth();
     const [ebooks, setEbooks] = useState<Ebook[]>([]);
     const [loading, setLoading] = useState(true);
@@ -54,8 +54,8 @@ export default function EbookOS() {
                         <Library className="w-6 h-6" />
                     </div>
                     <div>
-                        <h1 className="font-black text-xl tracking-tight leading-none text-white">EbookOS Admin</h1>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest mt-1">Gestão de Catálogo</p>
+                        <h1 className="font-black text-xl tracking-tight leading-none text-white">Ebook Interativo</h1>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest mt-1">Admin Dashboard</p>
                     </div>
                 </div>
 

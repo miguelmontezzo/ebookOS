@@ -31,7 +31,7 @@ export default function AdminLogin() {
             if (error) {
                 setError(error.message);
             } else {
-                navigate('/'); // Vai para o painel EbookOS Admin
+                navigate('/admin/dashboard'); // Vai para o painel de Admin
             }
         } catch (err: any) {
             setError('Ocorreu um erro na conexão. Verifique sua internet.');
@@ -48,11 +48,11 @@ export default function AdminLogin() {
                         <BookOpen className="w-8 h-8 text-zinc-900" />
                     </div>
                 </div>
-                <h2 className="mt-2 text-center text-3xl font-black tracking-tight text-white">
-                    EbookOS <span className="text-emerald-500">Admin</span>
+                <h2 className="mt-6 text-center text-3xl font-black tracking-tight text-white">
+                    Ebook <span className="text-emerald-500">Interativo</span>
                 </h2>
                 <p className="mt-2 text-center text-sm text-zinc-400">
-                    Acesse a gestão do seu catálogo de Ebooks.
+                    Acesse seu painel administrativo
                 </p>
             </div>
 
@@ -117,7 +117,7 @@ export default function AdminLogin() {
                                         Autenticando...
                                     </>
                                 ) : (
-                                    'Acessar EbookOS'
+                                    'Acessar Painel'
                                 )}
                             </button>
                         </div>

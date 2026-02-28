@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
-import EbookOS from './pages/EbookOS';
+import AdminDashboard from './pages/AdminDashboard';
+import LandingPage from './pages/LandingPage';
 import EbookReader from './pages/EbookReader';
 import MetodoEMPReader from './pages/MetodoEMPReader';
 import AdminLogin from './pages/AdminLogin';
@@ -70,8 +71,9 @@ function App() {
                     <Routes>
                         {/* ================= ADMIN ================= */}
                         <Route path="/admin/login" element={<AdminLogin />} />
-                        <Route path="/" element={
-                            <ProtectedAdminRoute><EbookOS /></ProtectedAdminRoute>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/admin/dashboard" element={
+                            <ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>
                         } />
                         <Route path="/admin/ebook/:id" element={
                             <ProtectedAdminRoute><AdminEbookManager /></ProtectedAdminRoute>
