@@ -23,10 +23,11 @@ export default function AdminDashboard() {
     useEffect(() => {
         async function fetchEbooks() {
             if (!user) return;
-            // Busca todos os ebooks publicos (já que o owner_id ainda está null no teste inicial)
+            // Busca somente ebooks do produtor logado
             const { data, error } = await supabase
                 .from('ebooks')
                 .select('*')
+                .eq('owner_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (data && !error) {
