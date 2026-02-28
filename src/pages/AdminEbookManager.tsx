@@ -30,6 +30,8 @@ export default function AdminEbookManager() {
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editCover, setEditCover] = useState('');
+    const [editPaymentLinkUrl, setEditPaymentLinkUrl] = useState('');
+    const [editPaymentProductId, setEditPaymentProductId] = useState('');
     const [isSavingSettings, setIsSavingSettings] = useState(false);
     const [editThemeColor, setEditThemeColor] = useState('indigo');
     const [coverFileSettings, setCoverFileSettings] = useState<File | null>(null);
@@ -50,6 +52,8 @@ export default function AdminEbookManager() {
                 setEditTitle(ebookData.title || '');
                 setEditDescription(ebookData.description || '');
                 setEditCover(ebookData.cover_url || '');
+                setEditPaymentLinkUrl(ebookData.payment_link_url || '');
+                setEditPaymentProductId(ebookData.payment_product_id || '');
                 setEditThemeColor(ebookData.theme_color || 'indigo');
 
                 // Carrega Alunos
@@ -149,11 +153,13 @@ export default function AdminEbookManager() {
             title: editTitle,
             description: editDescription,
             cover_url: editCover,
+            payment_link_url: editPaymentLinkUrl,
+            payment_product_id: editPaymentProductId,
             theme_color: editThemeColor
         }).eq('id', id);
 
         if (!error) {
-            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover, theme_color: editThemeColor });
+            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover, payment_link_url: editPaymentLinkUrl, payment_product_id: editPaymentProductId, theme_color: editThemeColor });
             alert('Configurações atualizadas com sucesso!');
         } else {
             alert('Erro ao salvar as configurações: ' + error.message);
@@ -434,6 +440,29 @@ export default function AdminEbookManager() {
                                         className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500 resize-none"
                                         placeholder="Nome do autor ou uma frase de impacto sobre o livro."
                                     />
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-zinc-300 mb-2">Link da página de pagamento (Kiwify)</label>
+                                        <input
+                                            type="url"
+                                            value={editPaymentLinkUrl}
+                                            onChange={e => setEditPaymentLinkUrl(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500"
+                                            placeholder="https://pay.kiwify.com.br/..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-zinc-300 mb-2">ID do produto na Kiwify</label>
+                                        <input
+                                            type="text"
+                                            value={editPaymentProductId}
+                                            onChange={e => setEditPaymentProductId(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500"
+                                            placeholder="Ex: prod_abc123"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div>
