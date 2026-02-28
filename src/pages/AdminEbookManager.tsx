@@ -30,10 +30,7 @@ export default function AdminEbookManager() {
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editCover, setEditCover] = useState('');
-    const [editPriceCents, setEditPriceCents] = useState<number>(0);
-    const [editCheckoutUrl, setEditCheckoutUrl] = useState('');
     const [isSavingSettings, setIsSavingSettings] = useState(false);
-    const [isSyncingKiwify, setIsSyncingKiwify] = useState(false);
     const [editThemeColor, setEditThemeColor] = useState('indigo');
     const [coverFileSettings, setCoverFileSettings] = useState<File | null>(null);
     const [coverPreviewSettings, setCoverPreviewSettings] = useState<string | null>(null);
@@ -53,8 +50,6 @@ export default function AdminEbookManager() {
                 setEditTitle(ebookData.title || '');
                 setEditDescription(ebookData.description || '');
                 setEditCover(ebookData.cover_url || '');
-                setEditPriceCents(Number(ebookData.price_cents || 0));
-                setEditCheckoutUrl(ebookData.checkout_url || '');
                 setEditThemeColor(ebookData.theme_color || 'indigo');
 
                 // Carrega Alunos
@@ -154,14 +149,11 @@ export default function AdminEbookManager() {
             title: editTitle,
             description: editDescription,
             cover_url: editCover,
-            price_cents: editPriceCents,
-            checkout_url: editCheckoutUrl,
-            payment_provider: editCheckoutUrl ? 'kiwify' : null,
             theme_color: editThemeColor
         }).eq('id', id);
 
         if (!error) {
-            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover, price_cents: editPriceCents, checkout_url: editCheckoutUrl, theme_color: editThemeColor });
+            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover, theme_color: editThemeColor });
             alert('Configurações atualizadas com sucesso!');
         } else {
             alert('Erro ao salvar as configurações: ' + error.message);
@@ -194,51 +186,6 @@ export default function AdminEbookManager() {
             alert('Erro ao regenerar capa: ' + (err?.message || 'erro inesperado'));
         } finally {
             setIsRegeneratingCover(false);
-        }
-    };
-
-    const handleSyncKiwifyProduct = async () => {
-        try {
-            if (!editTitle || !editPriceCents) {
-                alert('Informe título e preço para sincronizar com a Kiwify.');
-                return;
-            }
-
-            setIsSyncingKiwify(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            const token = session?.access_token;
-
-            const res = await fetch('/api/payments/kiwify/sync-product', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify({
-                    ebookId: id,
-                    title: editTitle,
-                    description: editDescription,
-                    priceCents: editPriceCents,
-                }),
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-                alert(data?.error || 'Falha ao sincronizar com a Kiwify.');
-                return;
-            }
-
-            if (data.standby) {
-                alert('Integração em modo standby (PAYMENTS_ENABLED=false).');
-                return;
-            }
-
-            if (data.checkoutUrl) setEditCheckoutUrl(data.checkoutUrl);
-            alert('Produto sincronizado com a Kiwify! Agora salve as configurações.');
-        } catch (err: any) {
-            alert('Erro ao sincronizar Kiwify: ' + (err?.message || 'erro inesperado'));
-        } finally {
-            setIsSyncingKiwify(false);
         }
     };
 
@@ -487,45 +434,6 @@ export default function AdminEbookManager() {
                                         className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500 resize-none"
                                         placeholder="Nome do autor ou uma frase de impacto sobre o livro."
                                     />
-                                </div>
-
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-zinc-300 mb-2">Preço (R$)</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={(editPriceCents / 100).toFixed(2)}
-                                            onChange={e => {
-                                                const value = Number(e.target.value || 0);
-                                                setEditPriceCents(Math.round(value * 100));
-                                            }}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500"
-                                            placeholder="97.00"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-zinc-300 mb-2">Checkout Kiwify</label>
-                                        <input
-                                            type="url"
-                                            value={editCheckoutUrl}
-                                            onChange={e => setEditCheckoutUrl(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500"
-                                            placeholder="https://pay.kiwify.com.br/..."
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <button
-                                        type="button"
-                                        onClick={handleSyncKiwifyProduct}
-                                        disabled={isSyncingKiwify}
-                                        className="w-full sm:w-auto bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-                                    >
-                                        {isSyncingKiwify ? <><Loader2 className="w-4 h-4 animate-spin" /> Sincronizando Kiwify...</> : 'Sincronizar produto Kiwify'}
-                                    </button>
                                 </div>
 
                                 <div>
