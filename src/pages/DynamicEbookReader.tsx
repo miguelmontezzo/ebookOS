@@ -118,8 +118,15 @@ export default function DynamicEbookReader() {
 
     const next = () => !isLast && setCurrentIndex(c => c + 1);
     const prev = () => !isFirst && setCurrentIndex(c => c - 1);
-    const primaryColor = `text-${ebookData.theme_color || 'indigo'}-600`;
-    const bgColor = `bg-${ebookData.theme_color || 'indigo'}-50`;
+    const themeColor = ebookData.theme_color || 'indigo';
+    const primaryColor = `text-${themeColor}-600`;
+    const bgColor = `bg-${themeColor}-50`;
+
+    // Replace hardcoded 'indigo' in AI-generated HTML with the ebook's theme color
+    const applyThemeColor = (html: string) => {
+        if (themeColor === 'indigo') return html;
+        return html.replaceAll('indigo', themeColor);
+    };
 
     return (
         <div className="flex h-screen bg-zinc-50 font-sans selection:bg-zinc-200">
@@ -284,7 +291,7 @@ export default function DynamicEbookReader() {
                                             'bulb-icon': () => <Lightbulb className="w-5 h-5 text-yellow-500 shrink-0 inline-block mr-2" />,
                                         } as any}
                                     >
-                                        {currentPage.content}
+                                        {applyThemeColor(currentPage.content)}
                                     </ReactMarkdown>
                                 </div>
                             </article>
