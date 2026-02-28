@@ -37,11 +37,36 @@ export default async function handler(req, res) {
     if (connErr || !connection) return res.status(404).json({ error: 'Webhook connection not found' });
 
     const payload = normalizePayload(req);
-    const status = String(payload.status || payload.order_status || payload.event || 'received').toLowerCase();
-    const eventType = String(payload.event || payload.type || payload.order_status || 'unknown');
+    const status = String(
+      payload.status ||
+      payload.order_status ||
+      payload.webhook_event_type ||
+      payload.event ||
+      'received'
+    ).toLowerCase();
 
-    const email = payload?.customer?.email || payload?.buyer?.email || payload?.email || null;
-    const productId = String(payload?.product?.id || payload?.product_id || payload?.offer?.product_id || '');
+    const eventType = String(
+      payload.webhook_event_type ||
+      payload.event ||
+      payload.type ||
+      payload.order_status ||
+      'unknown'
+    );
+
+    const email =
+      payload?.Customer?.email ||
+      payload?.customer?.email ||
+      payload?.buyer?.email ||
+      payload?.email ||
+      null;
+
+    const productId = String(
+      payload?.Product?.product_id ||
+      payload?.product?.id ||
+      payload?.product_id ||
+      payload?.offer?.product_id ||
+      ''
+    );
 
     await supabaseAdmin
       .from('webhook_connections')
@@ -53,7 +78,7 @@ export default async function handler(req, res) {
       })
       .eq('id', connection.id);
 
-    const approved = ['paid', 'approved', 'completed'].includes(status);
+    const approved = ['paid', 'approved', 'completed', 'order_approved'].includes(status);
     if (!approved || !email || !productId) {
       return res.status(200).json({ ok: true, received: true, processed: false });
     }
