@@ -7,6 +7,7 @@ import { useStudentAuth } from '../contexts/AuthStudentContext';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { GeneratedModule } from '../lib/gemini';
+import { CheckCircle2, Target, Zap, Activity, Dumbbell, Utensils, TrendingUp, Info, AlertTriangle, Lightbulb } from 'lucide-react';
 
 // Interface helpers
 interface FlatPage {
@@ -268,7 +269,17 @@ export default function DynamicEbookReader() {
                                 <h1>{currentPage.title}</h1>
 
                                 <div className="mt-8 text-lg">
-                                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                                    <ReactMarkdown
+                                        rehypePlugins={[rehypeRaw]}
+                                        components={{
+                                            'check-icon': () => <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 inline-block mr-2" />,
+                                            'target-icon': () => <Target className="w-5 h-5 text-emerald-500 shrink-0 inline-block mr-2" />,
+                                            'zap-icon': () => <Zap className="w-5 h-5 text-emerald-400 shrink-0 inline-block mr-2" />,
+                                            'info-icon': () => <Info className="w-5 h-5 text-indigo-500 shrink-0 inline-block mr-2" />,
+                                            'alert-icon': () => <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 inline-block mr-2" />,
+                                            'bulb-icon': () => <Lightbulb className="w-5 h-5 text-yellow-500 shrink-0 inline-block mr-2" />,
+                                        } as any}
+                                    >
                                         {currentPage.content}
                                     </ReactMarkdown>
                                 </div>
