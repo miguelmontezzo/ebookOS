@@ -15,7 +15,7 @@ interface LogoProps {
  *   /logo-light.svg → versão com texto escuro (para bg claro)
  */
 export default function Logo({ variant = 'dark', className = '' }: LogoProps) {
-    const src = variant === 'dark' ? '/logo-dark.svg' : '/logo-light.svg';
+    const src = variant === 'dark' ? '/logo_ebook.svg' : '/logo_ebook_black.svg';
 
     return (
         <img
