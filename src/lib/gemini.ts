@@ -264,17 +264,25 @@ export async function generateEbookContent(theme: string, targetAudience: string
 Seu objetivo é criar a estrutura de módulos e todo o conteúdo visual de um e - book altamente vendável, envolvente e interativo.
 
 REGRAS ABSOLUTAS DE FORMATAÇÃO:
-    1. NUNCA use markdown puro.Nunca use **, ##, -, > ou qualquer sintaxe markdown.
+1. NUNCA use markdown puro. Nunca use **, ##, -, > ou qualquer sintaxe markdown.
 2. SEMPRE use HTML puro com classes TailwindCSS conforme o catálogo abaixo.
 3. Use "class" nos atributos HTML, NUNCA "className".
 4. Cada página DEVE usar pelo menos 3 componentes diferentes do catálogo.
-5. Intercale blocos visuais(cards, tabelas, alertas) com parágrafos < p > simples.
-6. Para negrito use<strong>, para itálico use <em>.
-7. Para parágrafos use < p class="text-lg text-zinc-700 mb-4" >.
-8. Para subtítulos use < h3 class="text-2xl font-bold text-zinc-900 mb-4" >.
+5. Intercale blocos visuais (cards, tabelas, alertas, FAQ, checklists, callouts) com parágrafos <p> simples.
+6. Para negrito use <strong>, para itálico use <em>.
+7. Para parágrafos use <p class="text-lg text-zinc-700 mb-4">.
+8. Para subtítulos use <h3 class="text-2xl font-bold text-zinc-900 mb-4">.
 9. A primeira página do primeiro módulo DEVE ser a CAPA usando o Componente 1.
 
-Se o usuário fornecer um texto base, organize - o e expanda - o usando os componentes visuais.
+PADRÃO OBRIGATÓRIO DO EBOOK (REFERÊNCIA /o-metodo):
+- Estruture em módulos com progressão pedagógica clara (início > diagnóstico > execução > ajuste > fechamento).
+- Inclua blocos de "nível"/"diagnóstico" com critérios objetivos (iniciante, intermediário, avançado).
+- Inclua elementos interativos em todas as páginas-chave (checklist, FAQ, cards de ação, passo a passo).
+- Texto sempre escaneável: títulos fortes, subtítulos curtos, bullets objetivos e blocos visuais balanceados.
+- Evite páginas "chapadas" de texto corrido. Priorize leitura premium estilo ebook interativo.
+- Mantenha consistência visual entre páginas (tom editorial, hierarquia tipográfica e ritmo de componentes).
+
+Se o usuário fornecer um texto base, organize-o e expanda-o usando os componentes visuais.
 Se o usuário NÃO fornecer texto base, gere conteúdo espetacular e longo do zero.
 Nunca responda com explicações, apenas com o JSON bruto.
 
@@ -286,8 +294,15 @@ Crie um e - book completo e visualmente rico com:
     - Público Alvo: ${targetAudience}
 ${baseText ? `- Texto base do autor (organize, expanda e formate com os componentes visuais):\n\n${baseText}\n` : ''}
 
-    IMPORTANTE: Cada página deve parecer uma landing page premium.Use MUITOS componentes visuais do catálogo(cards, tabelas, alertas coloridos, callouts, badges).
-Não economize em elementos visuais.Cada página deve ter no mínimo 3 blocos visuais diferentes.`;
+    IMPORTANTE: Cada página deve parecer uma landing page premium. Use MUITOS componentes visuais do catálogo (cards, tabelas, alertas coloridos, callouts, badges).
+Não economize em elementos visuais. Cada página deve ter no mínimo 3 blocos visuais diferentes.
+
+Padronize no estilo do ebook /o-metodo:
+- pelo menos 1 bloco de diagnóstico ou nível no ebook
+- pelo menos 1 checklist interativo
+- pelo menos 1 FAQ visual
+- pelo menos 1 página de progressão/ajustes finais
+- fechamento com CTA forte e prático.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
