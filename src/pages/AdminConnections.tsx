@@ -15,6 +15,7 @@ export default function AdminConnections() {
   const [row, setRow] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   const webhookUrl = useMemo(() => {
     if (!row?.webhook_token) return '';
@@ -71,6 +72,26 @@ export default function AdminConnections() {
     setSaving(false);
   };
 
+  const sendLocalTest = async () => {
+    if (!webhookUrl) return;
+    setTesting(true);
+    try {
+      const url = `${webhookUrl}?event=local_test&status=approved&product_id=product_test&email=teste@exemplo.com`;
+      const res = await fetch(url, { method: 'GET' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(`Teste falhou: ${data?.error || res.status}`);
+      } else {
+        await load();
+        alert('Teste local enviado! Verifique o status abaixo.');
+      }
+    } catch (err: any) {
+      alert('Erro no teste local: ' + (err?.message || 'erro inesperado'));
+    } finally {
+      setTesting(false);
+    }
+  };
+
   if (loading) return <div className="min-h-screen bg-zinc-900 text-white p-8">Carregando...</div>;
 
   return (
@@ -106,6 +127,14 @@ export default function AdminConnections() {
                 className="bg-zinc-700 hover:bg-zinc-600 text-white font-semibold px-4 py-2 rounded-lg inline-flex items-center gap-2 disabled:opacity-70"
               >
                 <RefreshCw className="w-4 h-4" /> Regenerar token
+              </button>
+
+              <button
+                onClick={sendLocalTest}
+                disabled={testing}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg inline-flex items-center gap-2 disabled:opacity-70"
+              >
+                {testing ? 'Testando...' : 'Enviar teste local'}
               </button>
 
               {row?.last_event_at ? (
