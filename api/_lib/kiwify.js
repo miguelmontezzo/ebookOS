@@ -1,4 +1,6 @@
 const KIWIFY_BASE_URL = process.env.KIWIFY_BASE_URL || 'https://public-api.kiwify.com';
+const KIWIFY_TOKEN_PATH = process.env.KIWIFY_TOKEN_PATH || '/oauth/token';
+const KIWIFY_PRODUCTS_PATH = process.env.KIWIFY_PRODUCTS_PATH || '/v1/products';
 
 export async function getKiwifyToken() {
   const clientId = process.env.KIWIFY_CLIENT_ID;
@@ -8,7 +10,7 @@ export async function getKiwifyToken() {
     throw new Error('Missing KIWIFY_CLIENT_ID or KIWIFY_CLIENT_SECRET');
   }
 
-  const res = await fetch(`${KIWIFY_BASE_URL}/oauth/token`, {
+  const res = await fetch(`${KIWIFY_BASE_URL}${KIWIFY_TOKEN_PATH}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -33,8 +35,8 @@ export async function createOrUpdateProductOnKiwify({ title, description, priceC
   if (!accountId) throw new Error('Missing KIWIFY_ACCOUNT_ID');
 
   const endpoint = externalProductId
-    ? `${KIWIFY_BASE_URL}/v1/products/${externalProductId}`
-    : `${KIWIFY_BASE_URL}/v1/products`;
+    ? `${KIWIFY_BASE_URL}${KIWIFY_PRODUCTS_PATH}/${externalProductId}`
+    : `${KIWIFY_BASE_URL}${KIWIFY_PRODUCTS_PATH}`;
 
   const method = externalProductId ? 'PUT' : 'POST';
 

@@ -8,9 +8,15 @@ if (!supabaseUrl || !serviceRoleKey) {
   console.warn('[api] Missing SUPABASE_URL/VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
 }
 
-export const supabaseAdmin = createClient(supabaseUrl || '', serviceRoleKey || '', {
+export const supabaseAdmin = createClient(supabaseUrl || 'https://invalid.local', serviceRoleKey || 'invalid', {
   auth: { persistSession: false },
 });
+
+export function assertSupabaseServerConfig() {
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY in server environment');
+  }
+}
 
 export async function requireAdminFromBearer(req) {
   const auth = req.headers.authorization || '';
