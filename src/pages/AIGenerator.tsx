@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { generateEbookContent, GeneratedModule } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
+import { generateCoverImageFile } from '../lib/coverGenerator';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Loader2, ArrowLeft, BookOpen, Layers, Type, CheckCircle, ImagePlus } from 'lucide-react';
@@ -48,11 +49,20 @@ export default function AIGenerator() {
         setError(null);
 
         try {
-            // 1. Upload cover image to Supabase Storage if provided
+            // 1. Upload cover image to Supabase Storage if provided.
+            // If not provided, generate automatically with IA using title + author.
             let coverUrl: string | null = null;
-            if (coverFile) {
+            let finalCoverFile: File | null = coverFile;
+
+            if (!finalCoverFile) {
+                const authorName = (user.user_metadata?.name as string) || user.email || 'Autor';
+                setGenerationStep('🎨 Gerando capa automática com IA...');
+                finalCoverFile = await generateCoverImageFile(theme, authorName);
+            }
+
+            if (finalCoverFile) {
                 setGenerationStep('☁️ Fazendo upload da capa...');
-                coverUrl = await uploadCoverToSupabase(coverFile);
+                coverUrl = await uploadCoverToSupabase(finalCoverFile);
             }
 
             // 2. Convert theme to slug

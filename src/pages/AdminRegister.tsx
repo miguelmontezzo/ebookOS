@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { BookOpen, Shield, Loader2, UserPlus, CheckCircle2 } from 'lucide-react';
 
 export default function AdminRegister() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,7 +19,7 @@ export default function AdminRegister() {
     setError('');
     setSuccess('');
 
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       setError('Por favor, preencha todos os campos.');
       return;
     }
@@ -41,6 +42,9 @@ export default function AdminRegister() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          data: {
+            name,
+          },
         },
       });
 
@@ -87,6 +91,22 @@ export default function AdminRegister() {
                 <span>{success}</span>
               </div>
             )}
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-zinc-300">Nome do autor</label>
+              <div className="mt-1">
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="appearance-none block w-full px-3 py-3 border border-zinc-700/50 rounded-xl shadow-sm placeholder-zinc-500 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-zinc-900/50 text-white transition-colors"
+                  placeholder="Seu nome de autor"
+                />
+              </div>
+            </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email</label>
