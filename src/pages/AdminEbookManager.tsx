@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
+import ColorPicker from '../components/ColorPicker';
 
 export default function AdminEbookManager() {
     const { id } = useParams();
@@ -19,6 +20,7 @@ export default function AdminEbookManager() {
 
     // Regras State
     const [regras, setRegras] = useState<any[]>([]);
+    const [dynamicModuleNames, setDynamicModuleNames] = useState<string[]>([]);
     const [newModuloNome, setNewModuloNome] = useState('');
     const [newDiasLiberacao, setNewDiasLiberacao] = useState('');
     const [isAddingRegra, setIsAddingRegra] = useState(false);
@@ -28,6 +30,7 @@ export default function AdminEbookManager() {
     const [editDescription, setEditDescription] = useState('');
     const [editCover, setEditCover] = useState('');
     const [isSavingSettings, setIsSavingSettings] = useState(false);
+    const [editThemeColor, setEditThemeColor] = useState('indigo');
     const [coverFileSettings, setCoverFileSettings] = useState<File | null>(null);
     const [coverPreviewSettings, setCoverPreviewSettings] = useState<string | null>(null);
     const [isUploadingCover, setIsUploadingCover] = useState(false);
@@ -45,11 +48,25 @@ export default function AdminEbookManager() {
                 setEditTitle(ebookData.title || '');
                 setEditDescription(ebookData.description || '');
                 setEditCover(ebookData.cover_url || '');
+                setEditThemeColor(ebookData.theme_color || 'indigo');
 
                 // Carrega Alunos
                 await fetchAlunos();
                 // Carrega Regras
                 await fetchRegras();
+
+                // Carrega nomes dos módulos do JSON original (para manter a ordem fixa)
+                if (!EBOOK_MODULES[ebookData.slug]) {
+                    const { data: contentData } = await supabase
+                        .from('ebook_contents')
+                        .select('content_json')
+                        .eq('ebook_id', ebookData.id)
+                        .single();
+                    if (contentData?.content_json) {
+                        const names = contentData.content_json.map((m: any) => m.module_name);
+                        setDynamicModuleNames(names);
+                    }
+                }
             }
             setLoading(false);
         }
@@ -129,11 +146,12 @@ export default function AdminEbookManager() {
         const { error } = await supabase.from('ebooks').update({
             title: editTitle,
             description: editDescription,
-            cover_url: editCover
+            cover_url: editCover,
+            theme_color: editThemeColor
         }).eq('id', id);
 
         if (!error) {
-            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover });
+            setEbook({ ...ebook, title: editTitle, description: editDescription, cover_url: editCover, theme_color: editThemeColor });
             alert('Configurações atualizadas com sucesso!');
         } else {
             alert('Erro ao salvar as configurações: ' + error.message);
@@ -284,7 +302,7 @@ export default function AdminEbookManager() {
                                 </thead>
                                 <tbody className="divide-y divide-zinc-700/30">
                                     {(() => {
-                                        const moduleList = EBOOK_MODULES[ebook.slug] || regras.map((r: any) => r.modulo_nome);
+                                        const moduleList = EBOOK_MODULES[ebook.slug] || dynamicModuleNames;
                                         if (moduleList.length === 0) {
                                             return (
                                                 <tr>
@@ -438,6 +456,9 @@ export default function AdminEbookManager() {
                                         placeholder="Ou cole uma URL diretamente..."
                                     />
                                 </div>
+
+                                {/* Color Picker */}
+                                <ColorPicker value={editThemeColor} onChange={setEditThemeColor} />
 
                                 <button disabled={isSavingSettings} type="submit" className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-8 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                                     {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Configurações</>}

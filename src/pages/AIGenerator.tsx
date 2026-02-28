@@ -5,6 +5,7 @@ import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Loader2, ArrowLeft, BookOpen, Layers, Type, CheckCircle, ImagePlus } from 'lucide-react';
+import ColorPicker from '../components/ColorPicker';
 
 export default function AIGenerator() {
     const { user } = useAdminAuth();
@@ -13,6 +14,7 @@ export default function AIGenerator() {
     const [theme, setTheme] = useState('');
     const [audience, setAudience] = useState('');
     const [baseText, setBaseText] = useState('');
+    const [themeColor, setThemeColor] = useState('indigo');
 
     // Status Trackers
     const [isGenerating, setIsGenerating] = useState(false);
@@ -66,7 +68,7 @@ export default function AIGenerator() {
                 title: theme,
                 slug: slug,
                 description: `Ebook criado por Inteligência Artificial focado em ${audience}.`,
-                theme_color: 'indigo',
+                theme_color: themeColor,
                 cover_url: coverUrl
             }]).select().single();
 
@@ -224,6 +226,9 @@ export default function AIGenerator() {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Color Picker */}
+                            <ColorPicker value={themeColor} onChange={setThemeColor} />
 
                             <button
                                 type="submit"
