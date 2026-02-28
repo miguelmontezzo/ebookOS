@@ -9,7 +9,6 @@ import AdminRegister from './pages/AdminRegister';
 import ConfirmAccount from './pages/ConfirmAccount';
 import AdminAccount from './pages/AdminAccount';
 import AdminEbookManager from './pages/AdminEbookManager';
-import AdminConnections from './pages/AdminConnections';
 import StudentLogin from './pages/StudentLogin';
 import AIGenerator from './pages/AIGenerator';
 import DynamicEbookReader from './pages/DynamicEbookReader';
@@ -91,9 +90,6 @@ function App() {
                         } />
                         <Route path="/admin/account" element={
                             <ProtectedAdminRoute><AdminAccount /></ProtectedAdminRoute>
-                        } />
-                        <Route path="/admin/connections" element={
-                            <ProtectedAdminRoute><AdminConnections /></ProtectedAdminRoute>
                         } />
 
                         {/* ================ STUDENT ================ */}

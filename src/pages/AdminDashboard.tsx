@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, LogOut, Copy, ExternalLink, Loader2, Sparkles, UserCircle2, Link2 } from 'lucide-react';
+import { BookOpen, LogOut, Copy, ExternalLink, Loader2, Sparkles, UserCircle2 } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { supabase } from '../lib/supabase';
 import Logo from '../components/Logo';
@@ -59,15 +59,6 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <Link
-                        to="/admin/connections"
-                        className="flex items-center gap-2 px-2.5 sm:px-3 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
-                        title="Conexões"
-                    >
-                        <Link2 className="w-4 h-4" />
-                        <span className="hidden sm:inline">Conexões</span>
-                    </Link>
-
                     <Link
                         to="/admin/account"
                         className="flex items-center gap-2 px-2.5 sm:px-3 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
