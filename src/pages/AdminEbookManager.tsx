@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Users, Lock, ChevronLeft, Plus, Trash2, Save, Loader2, BookOpen, Settings } from 'lucide-react';
+import { Users, Lock, ChevronLeft, Plus, Trash2, Save, Loader2, BookOpen, Settings, Dices } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 
 export default function AdminEbookManager() {
@@ -77,6 +77,11 @@ export default function AdminEbookManager() {
             alert('Erro ao adicionar aluno: ' + error.message);
         }
         setIsAddingAluno(false);
+    };
+
+    const handleGeneratePassword = () => {
+        const pass = Math.random().toString(36).substring(2, 10);
+        setNewPassword(pass);
     };
 
     const handleRemoverAluno = async (alunoId: string) => {
@@ -194,11 +199,21 @@ export default function AdminEbookManager() {
                                 </div>
                                 <div className="flex-1">
                                     <label className="block text-xs font-medium text-zinc-400 mb-1">Senha (Modo Planilha)</label>
-                                    <input
-                                        type="text" required value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white focus:ring-emerald-500 focus:border-emerald-500"
-                                        placeholder="Defina uma senha"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text" required value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 pr-12 text-white focus:ring-emerald-500 focus:border-emerald-500"
+                                            placeholder="Defina uma senha"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleGeneratePassword}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-colors"
+                                            title="Gerar senha aleatória"
+                                        >
+                                            <Dices className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                                 <button disabled={isAddingAluno} type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-zinc-900 font-bold px-6 py-2.5 rounded-xl transition-colors h-[46px] flex items-center justify-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                     {isAddingAluno ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Adicionar</>}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, ChevronRight, ChevronLeft, Target, AlertTriangle, Lightbulb, Smartphone, ShieldAlert, Flag, Lock, Loader2 } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronLeft, Target, AlertTriangle, Lightbulb, Smartphone, ShieldAlert, Flag, Lock, Loader2, LogOut } from 'lucide-react';
 import { Intro, Fundamentos, Capitulo1 } from './ModuloEMP1';
 import { OGancho } from './ModuloEMP2';
 import { OConflito } from './ModuloEMP3';
@@ -29,7 +29,7 @@ interface ModuloRegra {
 }
 
 export default function MetodoEMPReader() {
-    const { studentUser } = useStudentAuth();
+    const { studentUser, logoutStudent } = useStudentAuth();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [regras, setRegras] = useState<ModuloRegra[]>([]);
@@ -165,6 +165,16 @@ export default function MetodoEMPReader() {
                             );
                         })
                     )}
+                </div>
+
+                <div className="p-4 border-t border-zinc-200">
+                    <button
+                        onClick={logoutStudent}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold text-zinc-600 bg-zinc-100 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Sair do Ebook
+                    </button>
                 </div>
             </div>
 
