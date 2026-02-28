@@ -71,6 +71,26 @@ CREATE POLICY "Leitura pública das regras para o Leitor do Aluno"
     USING (true);
 
 
+-- 4. Tabela de Conteúdo de Ebooks (Para Leitura Dinâmica / IA)
+-- Armazena o JSON completo gerado pela IA (Estrutura de Módulos e Páginas em Markdown)
+CREATE TABLE public.ebook_contents (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    ebook_id UUID REFERENCES public.ebooks(id) ON DELETE CASCADE UNIQUE, -- 1 Conteúdo por Ebook
+    content_json JSONB NOT NULL, -- Exemplo: [ { "module": "Nome", "pages": [ { "title": "Pág", "markdown": "Texto" } ] } ]
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.ebook_contents ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins podem editar os conteúdos de seus ebooks" 
+    ON public.ebook_contents FOR ALL 
+    USING (
+        auth.uid() IN (SELECT owner_id FROM public.ebooks WHERE id = public.ebook_contents.ebook_id)
+    );
+CREATE POLICY "Leitura pública do conteúdo do ebook para o Aluno" 
+    ON public.ebook_contents FOR SELECT 
+    USING (true);
+
+
 -- INSERTS DE TESTE (Para você brincar logo de cara após rodar o SQL)
 -- 1. Inserir os Ebooks Catalogo (Como donos não existem ainda, deixamos owner_id = null inicialmente para teste, depois você ajusta)
 INSERT INTO public.ebooks (title, slug, description, theme_color) VALUES 

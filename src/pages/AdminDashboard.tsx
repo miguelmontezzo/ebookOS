@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Library, BookOpen, LogOut, Copy, ExternalLink, Loader2, Plus } from 'lucide-react';
+import { Library, BookOpen, LogOut, Copy, ExternalLink, Loader2, Plus, Sparkles } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { supabase } from '../lib/supabase';
 
@@ -75,6 +75,13 @@ export default function AdminDashboard() {
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">Meus Ebooks</h2>
                         <p className="text-zinc-400 text-base sm:text-lg">Catálogo de publicações ativas (Visualização do Produtor).</p>
                     </div>
+                    <Link
+                        to="/admin/ai-studio"
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20"
+                    >
+                        <Sparkles className="w-5 h-5" />
+                        Criar Ebook com IA
+                    </Link>
                 </div>
 
                 {loading ? (

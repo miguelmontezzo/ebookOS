@@ -7,6 +7,8 @@ import MetodoEMPReader from './pages/MetodoEMPReader';
 import AdminLogin from './pages/AdminLogin';
 import AdminEbookManager from './pages/AdminEbookManager';
 import StudentLogin from './pages/StudentLogin';
+import AIGenerator from './pages/AIGenerator';
+import DynamicEbookReader from './pages/DynamicEbookReader';
 import { AuthAdminProvider, useAdminAuth } from './contexts/AuthAdminContext';
 import { AuthStudentProvider, useStudentAuth } from './contexts/AuthStudentContext';
 import { Loader2 } from 'lucide-react';
@@ -74,6 +76,9 @@ function App() {
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/admin/dashboard" element={
                             <ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>
+                        } />
+                        <Route path="/admin/ai-studio" element={
+                            <ProtectedAdminRoute><AIGenerator /></ProtectedAdminRoute>
                         } />
                         <Route path="/admin/ebook/:id" element={
                             <ProtectedAdminRoute><AdminEbookManager /></ProtectedAdminRoute>
