@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
+import { generateCoverImageFile } from '../lib/coverGenerator';
 import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 import ColorPicker from '../components/ColorPicker';
@@ -34,6 +35,7 @@ export default function AdminEbookManager() {
     const [coverFileSettings, setCoverFileSettings] = useState<File | null>(null);
     const [coverPreviewSettings, setCoverPreviewSettings] = useState<string | null>(null);
     const [isUploadingCover, setIsUploadingCover] = useState(false);
+    const [isRegeneratingCover, setIsRegeneratingCover] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -157,6 +159,34 @@ export default function AdminEbookManager() {
             alert('Erro ao salvar as configurações: ' + error.message);
         }
         setIsSavingSettings(false);
+    };
+
+    const handleRegenerateCover = async () => {
+        try {
+            setIsRegeneratingCover(true);
+            const { data: userData } = await supabase.auth.getUser();
+            const authorName = (userData.user?.user_metadata?.name as string) || userData.user?.email || 'Autor';
+
+            const generatedFile = await generateCoverImageFile(editTitle || ebook?.title || 'Ebook', authorName);
+            if (!generatedFile) {
+                alert('Não foi possível gerar a capa automaticamente agora.');
+                return;
+            }
+
+            const uploadedUrl = await uploadCoverToSupabase(generatedFile);
+            if (!uploadedUrl) {
+                alert('Falha no upload da nova capa.');
+                return;
+            }
+
+            setEditCover(uploadedUrl);
+            setCoverPreviewSettings(uploadedUrl);
+            alert('Nova capa gerada com sucesso! Clique em "Salvar Configurações" para confirmar.');
+        } catch (err: any) {
+            alert('Erro ao regenerar capa: ' + (err?.message || 'erro inesperado'));
+        } finally {
+            setIsRegeneratingCover(false);
+        }
     };
 
     if (loading) return <div className="min-h-screen bg-zinc-900 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>;
@@ -448,6 +478,17 @@ export default function AdminEbookManager() {
                                             <Loader2 className="w-4 h-4 animate-spin" /> Enviando imagem...
                                         </div>
                                     )}
+
+                                    <div className="mb-3">
+                                        <button
+                                            type="button"
+                                            onClick={handleRegenerateCover}
+                                            disabled={isRegeneratingCover || isUploadingCover}
+                                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                        >
+                                            {isRegeneratingCover ? <><Loader2 className="w-4 h-4 animate-spin" /> Regenerando capa...</> : 'Regenerar capa com IA'}
+                                        </button>
+                                    </div>
 
                                     {/* URL Input (manual) */}
                                     <input
