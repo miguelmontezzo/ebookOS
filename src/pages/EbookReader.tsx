@@ -114,10 +114,10 @@ export default function App() {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset - y - 0 left - 0 z - 50 w - 72 bg - white border - r border - zinc - 200 transform transition - transform duration - 300 ease -in -out flex flex - col
+        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-zinc-200 transform transition-transform duration-300 ease-in-out flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-md:relative md: translate - x - 0
-  `}>
+        md:relative md:translate-x-0
+      `}>
         <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
           <div>
             <Logo variant="light" />
@@ -174,16 +174,16 @@ md:relative md: translate - x - 0
                             }
                           }}
                           className={`
-w - full flex items - center gap - 3 px - 3 py - 2 rounded - lg text - sm font - medium transition - colors text - left
+                            w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left
                             ${isActive
                               ? 'bg-emerald-50 text-emerald-700'
                               : isBlocked
                                 ? 'text-zinc-300 cursor-not-allowed hidden'
                                 : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                             }
-`}
+                          `}
                         >
-                          <Icon className={`w - 4 h - 4 ${isActive ? 'text-emerald-500' : 'text-zinc-400'} `} />
+                          <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-500' : 'text-zinc-400'}`} />
                           {page.title}
                         </button>
                       );
