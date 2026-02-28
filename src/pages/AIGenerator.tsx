@@ -31,7 +31,7 @@ export default function AIGenerator() {
         setGenerationStep('A IA está lendo o contexto e escrevendo os módulos (Isso pode levar até 30 segundos)...');
 
         try {
-            const result = await generateEbookContent(theme, audience, baseText);
+            const result = await generateEbookContent(theme, audience, baseText, themeColor);
             setGeneratedEbook(result);
             setGenerationStep('Conteúdo gerado com sucesso!');
         } catch (err: any) {
