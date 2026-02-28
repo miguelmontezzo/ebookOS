@@ -50,18 +50,19 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-zinc-900 text-zinc-100 font-sans">
             {/* Header */}
-            <header className="bg-zinc-800/50 border-b border-zinc-700/50 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl">
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <Logo variant="dark" />
-                    <div className="border-l border-zinc-700 pl-3 ml-1">
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">Admin Dashboard</p>
+            <header className="bg-zinc-800/50 border-b border-zinc-700/50 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 sticky top-0 z-10 backdrop-blur-xl">
+                <div className="flex items-center gap-2 min-w-0">
+                    <Logo variant="dark" className="h-7 sm:h-8 max-w-[140px] sm:max-w-none object-contain" />
+                    <div className="border-l border-zinc-700 pl-2 sm:pl-3 ml-0.5 sm:ml-1 hidden sm:block">
+                        <p className="text-[10px] sm:text-xs font-semibold text-emerald-500 uppercase tracking-widest whitespace-nowrap">Admin Dashboard</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     <Link
                         to="/admin/account"
-                        className="flex items-center gap-2 px-3 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                        className="flex items-center gap-2 px-2.5 sm:px-3 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                        title="Conta"
                     >
                         {user?.user_metadata?.avatar_url ? (
                             <img
@@ -72,15 +73,16 @@ export default function AdminDashboard() {
                         ) : (
                             <UserCircle2 className="w-4 h-4" />
                         )}
-                        Conta
+                        <span className="hidden sm:inline">Conta</span>
                     </Link>
 
                     <button
                         onClick={logout}
-                        className="flex items-center gap-2 px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                        className="flex items-center gap-2 px-2.5 sm:px-4 py-2 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-sm text-zinc-300 transition-colors"
+                        title="Sair"
                     >
                         <LogOut className="w-4 h-4" />
-                        Sair
+                        <span className="hidden sm:inline">Sair</span>
                     </button>
                 </div>
             </header>
