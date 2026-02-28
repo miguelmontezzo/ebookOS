@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Library, BookOpen, LogOut, Copy, ExternalLink, Loader2, Plus, Sparkles } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { supabase } from '../lib/supabase';
+import Logo from '../components/Logo';
 
 interface Ebook {
     id: string;
@@ -50,12 +51,9 @@ export default function AdminDashboard() {
             {/* Header */}
             <header className="bg-zinc-800/50 border-b border-zinc-700/50 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl">
                 <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="bg-emerald-500/20 p-2 rounded-xl text-emerald-400">
-                        <Library className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h1 className="font-black text-xl tracking-tight leading-none text-white">Ebook Interativo</h1>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest mt-1">Admin Dashboard</p>
+                    <Logo variant="dark" />
+                    <div className="border-l border-zinc-700 pl-3 ml-1">
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">Admin Dashboard</p>
                     </div>
                 </div>
 

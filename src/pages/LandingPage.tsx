@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp, Smartphone, ArrowRight, CheckCircle2, Search, ArrowDown, ChevronDown, Lock, Shield, Zap, Image as ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 export default function LandingPage() {
     const [openFeature, setOpenFeature] = useState<number | null>(0);
@@ -9,12 +10,7 @@ export default function LandingPage() {
         <div className="min-h-screen bg-[#020617] font-sans text-slate-100 selection:bg-indigo-500/30">
             {/* Header */}
             <header className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-[#020617]/80 backdrop-blur-md border-b border-white/5">
-                <div className="flex items-center gap-2">
-                    <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-                        <BookOpen className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-sm tracking-wide text-white">Ebook Interativo</span>
-                </div>
+                <Logo variant="dark" />
                 <div className="flex items-center gap-6">
                     <Link to="/admin/login" className="text-xs font-medium text-slate-400 hover:text-white transition-colors">
                         Área do Produtor
@@ -252,8 +248,9 @@ export default function LandingPage() {
                         <Link to="#" className="hover:text-slate-300">Termos</Link>
                         <Link to="#" className="hover:text-slate-300">Suporte</Link>
                     </div>
-                    <div className="flex gap-4">
-                        <span>&copy; {new Date().getFullYear()} Ebook Interativo.</span>
+                    <div className="flex items-center gap-4">
+                        <Logo variant="dark" className="opacity-50" />
+                        <span>&copy; {new Date().getFullYear()}</span>
                     </div>
                 </div>
             </footer>

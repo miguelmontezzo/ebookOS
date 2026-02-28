@@ -7,6 +7,7 @@ import { useStudentAuth } from '../contexts/AuthStudentContext';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { GeneratedModule } from '../lib/gemini';
+import Logo from '../components/Logo';
 import { CheckCircle2, Target, Zap, Activity, Dumbbell, Utensils, TrendingUp, Info, AlertTriangle, Lightbulb } from 'lucide-react';
 
 // Interface helpers
@@ -137,7 +138,10 @@ export default function DynamicEbookReader() {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="p-6 border-b border-zinc-200 flex items-center justify-between sticky top-0 bg-white z-10">
-                    <h2 className="font-black text-xl tracking-tight text-zinc-900 line-clamp-2">{ebookData.title}</h2>
+                    <div>
+                        <Logo variant="light" />
+                        <h2 className="font-black text-lg tracking-tight text-zinc-900 line-clamp-2 mt-2">{ebookData.title}</h2>
+                    </div>
                     <button
                         className="md:hidden p-2 -mr-2 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
                         onClick={() => setIsSidebarOpen(false)}

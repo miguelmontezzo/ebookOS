@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useStudentAuth } from '../contexts/AuthStudentContext';
 import { Lock, Loader2, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import Logo from '../components/Logo';
 
 export default function StudentLogin() {
     const { slug } = useParams();
@@ -55,9 +56,7 @@ export default function StudentLogin() {
         <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                 <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/20">
-                        <BookOpen className="w-8 h-8 text-white" />
-                    </div>
+                    <Logo variant="light" className="scale-150" />
                 </div>
                 <h2 className="mt-2 text-center text-3xl font-black tracking-tight text-zinc-900">
                     Acesso ao Aluno

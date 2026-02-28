@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, ChevronRight, ChevronLeft, Target, AlertTriangle, Lightbulb, Smartphone, ShieldAlert, Flag, Lock, Loader2, LogOut, Search } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronLeft, Target, AlertTriangle, Lightbulb, Smartphone, ShieldAlert, Flag, Lock, Loader2, LogOut, Search, BookOpen } from 'lucide-react';
+import Logo from '../components/Logo';
 import { Intro, Fundamentos, Capitulo1 } from './ModuloEMP1';
 import { OGancho } from './ModuloEMP2';
 import { OConflito } from './ModuloEMP3';
@@ -108,14 +109,14 @@ export default function MetodoEMPReader() {
 
             {/* Sidebar */}
             <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-zinc-200 transform transition-transform duration-300 ease-in-out flex flex-col
+        fixed inset - y - 0 left - 0 z - 50 w - 72 bg - white border - r border - zinc - 200 transform transition - transform duration - 300 ease -in -out flex flex - col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0
-      `}>
+md:relative md: translate - x - 0
+    `}>
                 <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
                     <div>
-                        <div className="text-xs font-bold tracking-widest text-indigo-600 uppercase mb-1">Ebook Interativo</div>
-                        <h2 className="font-black text-xl tracking-tight">MÉTODO EMP</h2>
+                        <Logo variant="light" />
+                        <h2 className="font-black text-xl tracking-tight mt-2">MÉTODO EMP</h2>
                     </div>
                     <button className="md:hidden text-zinc-500" onClick={() => setIsSidebarOpen(false)}>
                         <X className="w-6 h-6" />
@@ -168,15 +169,16 @@ export default function MetodoEMPReader() {
                                                         }
                                                     }}
                                                     className={`
-                              w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left
+w - full flex items - center gap - 3 px - 3 py - 2 rounded - lg text - sm font - medium transition - colors text - left
                               ${isActive
                                                             ? 'bg-indigo-50 text-indigo-700'
                                                             : isBlocked
                                                                 ? 'text-zinc-300 cursor-not-allowed hidden'
-                                                                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}
-                            `}
+                                                                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                                                        }
+`}
                                                 >
-                                                    <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-500' : 'text-zinc-400'}`} />
+                                                    <Icon className={`w - 4 h - 4 ${isActive ? 'text-indigo-500' : 'text-zinc-400'} `} />
                                                     {page.title}
                                                 </button>
                                             );
