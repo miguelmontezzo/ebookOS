@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 
 const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-const preferredImageModel = (import.meta as any).env?.VITE_COVER_IMAGE_MODEL || 'nano-banana-2';
+const preferredImageModel = (import.meta as any).env?.VITE_COVER_IMAGE_MODEL || 'gemini-3.1-flash-image-preview';
 
 const BASE_PROMPT = `Você é um Diretor de Arte Editorial especializado em capas minimalistas de alto padrão.
 
