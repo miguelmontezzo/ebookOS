@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { BookOpen, Shield, Loader2 } from 'lucide-react';
 
@@ -121,6 +121,13 @@ export default function AdminLogin() {
                                 )}
                             </button>
                         </div>
+
+                        <p className="text-center text-sm text-zinc-400">
+                            Ainda não tem conta?{' '}
+                            <Link to="/admin/register" className="text-emerald-400 hover:text-emerald-300 font-semibold">
+                                Criar conta admin
+                            </Link>
+                        </p>
                     </form>
 
                 </div>
