@@ -43,19 +43,27 @@ export default function AIGenerator() {
         setError(null);
 
         try {
-            // 1. Convert theme to slug
+            // 1. Generate Automatic Cover Image using Pollinations AI
+            setGenerationStep('Desenhando a capa do eBook...');
+            const encodedTheme = encodeURIComponent(`A cinematic, minimalist, highly professional and beautiful subtle book cover background about ${theme}. Only background texture and subtle elements, no text, no title.`);
+            const coverSeed = Math.floor(Math.random() * 10000000);
+            const coverUrl = `https://image.pollinations.ai/prompt/${encodedTheme}?seed=${coverSeed}&width=800&height=1200&nologo=true`;
+
+            // 2. Convert theme to slug
+            setGenerationStep('Salvando Ebook no Banco de Dados...');
             let slug = theme.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
             if (!slug) slug = `ebook-ai-${Date.now()}`;
             // Add a random hash to prevent unique constrains
             slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
 
-            // 2. Insert the Ebook Catalog Item
+            // 3. Insert the Ebook Catalog Item
             const { data: ebookData, error: ebookError } = await supabase.from('ebooks').insert([{
                 owner_id: user.id,
                 title: theme,
                 slug: slug,
                 description: `Ebook criado por Inteligência Artificial focado em ${audience}.`,
-                theme_color: 'indigo'
+                theme_color: 'indigo',
+                cover_url: coverUrl
             }]).select().single();
 
             if (ebookError) throw ebookError;

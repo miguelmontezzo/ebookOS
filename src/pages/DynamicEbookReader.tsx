@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { useStudentAuth } from '../contexts/AuthStudentContext';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import { GeneratedModule } from '../lib/gemini';
 
 // Interface helpers
@@ -267,7 +268,9 @@ export default function DynamicEbookReader() {
                                 <h1>{currentPage.title}</h1>
 
                                 <div className="mt-8 text-lg">
-                                    <ReactMarkdown>{currentPage.content}</ReactMarkdown>
+                                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                                        {currentPage.content}
+                                    </ReactMarkdown>
                                 </div>
                             </article>
                         </motion.div>

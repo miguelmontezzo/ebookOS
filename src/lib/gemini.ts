@@ -39,7 +39,7 @@ const ebookSchema: Schema = {
                         },
                         content: {
                             type: Type.STRING,
-                            description: "O conteúdo completo deste capítulo em linguagem rica Markdown. Use marcação para títulos (###), negritos, listas numeradas, citações e crie textos envolventes, fluidos e didáticos. Desenvolva o texto profundamente.",
+                            description: "O conteúdo completo deste capítulo. Você DEVE mesclar Markdown tradicional com tags HTML e classes do TailwindCSS para criar um visual premium. Use as cores zinc, emerald e indigo. Exemplos obrigatórios de uso: 1. Caixas de Destaque: `<div className=\"bg-zinc-50 border border-zinc-200 p-6 rounded-2xl mb-6\"><h3 className=\"font-bold text-xl mb-3 text-zinc-900\">Título</h3><p>Texto</p></div>` 2. Cards em Grid: `<div className=\"grid md:grid-cols-2 gap-6 mb-6\"><div className=\"bg-emerald-50 p-6 rounded-2xl border border-emerald-100\"><h4 className=\"font-bold text-emerald-900 mb-2\">Card 1</h4><p className=\"text-sm text-emerald-800\">Texto</p></div>...</div>` 3. Alertas: `<div className=\"bg-emerald-900 text-white p-6 rounded-2xl my-8\"><h3 className=\"font-bold text-emerald-400 mb-2\">Aviso</h3><p>Texto</p></div>`. NUNCA use markdown puro se puder usar uma dessas caixas para destacar a informação.",
                         }
                     },
                     required: ["title", "content"]
@@ -71,7 +71,9 @@ Crie um e-book completo com as seguintes características:
 - Público Alvo: ${targetAudience}
 ${baseText ? `- Utilize como base de conhecimento OBRIGATÓRIA o seguinte texto raw fornecido pelo autor (organize, expanda e refine-o):\n\n${baseText}\n` : ''}
 
-Atenção redobrada ao preencher a chave 'content' com Markdown. Divida bem os parágrafos, ensine passo a passo e mantenha o leitor preso da primeira a última palavra.`;
+Atenção redobrada ao preencher a chave 'content'. Você não está escrevendo um txt simples, você está desenhando uma página web! 
+É OBRIGATÓRIO o uso intenso de divs com classes Tailwind baseadas no Ebook Interativo (ex: bg-zinc-50, border-zinc-200, rounded-2xl, p-6, grid, md:grid-cols-2, bg-emerald-50, text-emerald-900, bg-indigo-50, text-indigo-900). 
+Intercale parágrafos soltos com essas caixas ricas para prender a atenção do leitor.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
