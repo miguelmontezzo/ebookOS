@@ -3,7 +3,7 @@ import { generateEbookContent, GeneratedModule } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Loader2, ArrowLeft, BookOpen, Layers, Type, CheckCircle } from 'lucide-react';
+import { Sparkles, Loader2, ArrowLeft, BookOpen, Layers, Type, CheckCircle, ImagePlus } from 'lucide-react';
 
 export default function AIGenerator() {
     const { user } = useAdminAuth();
@@ -18,6 +18,8 @@ export default function AIGenerator() {
     const [generationStep, setGenerationStep] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const [generatedEbook, setGeneratedEbook] = useState<GeneratedModule[] | null>(null);
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,47 +45,39 @@ export default function AIGenerator() {
         setError(null);
 
         try {
-            // 1. Generate Automatic Cover Image using Gemini (NanoBanana Pro) + Upload to ImgBB
-            setGenerationStep('🎨 Desenhando a capa com Inteligência Artificial...');
-            let coverUrl = '';
-            try {
-                const { GoogleGenAI } = await import('@google/genai');
-                const geminiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-                if (geminiKey) {
-                    const imageAi = new GoogleGenAI({ apiKey: geminiKey });
-                    const imageResponse = await imageAi.models.generateContent({
-                        model: 'gemini-2.0-flash-preview-image-generation',
-                        contents: `Generate a cinematic, minimalist, highly professional and beautiful book cover image about "${theme}". The image should be a stunning visual background with subtle thematic elements. Do NOT include any text, title, or words in the image. Only beautiful abstract or thematic visual elements. Vertical portrait orientation.`,
-                        config: {
-                            responseModalities: ['image', 'text'],
-                        }
+            // 1. Upload cover image to ImgBB if provided
+            let coverUrl: string | null = null;
+            if (coverFile) {
+                setGenerationStep('☁️ Fazendo upload da capa...');
+                try {
+                    const reader = new FileReader();
+                    const base64 = await new Promise<string>((resolve, reject) => {
+                        reader.onload = () => {
+                            const result = reader.result as string;
+                            // Remove the data:image/...;base64, prefix
+                            resolve(result.split(',')[1]);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(coverFile);
                     });
 
-                    // Extract base64 image from response
-                    const parts = imageResponse?.candidates?.[0]?.content?.parts;
-                    const imagePart = parts?.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'));
+                    const imgbbFormData = new FormData();
+                    imgbbFormData.append('key', 'e800bc35127717cfeccbd47cc58a6c7a');
+                    imgbbFormData.append('image', base64);
+                    imgbbFormData.append('name', `ebook-cover-${Date.now()}`);
 
-                    if (imagePart?.inlineData?.data) {
-                        setGenerationStep('☁️ Fazendo upload da capa para a nuvem...');
-                        // Upload to ImgBB
-                        const imgbbFormData = new FormData();
-                        imgbbFormData.append('key', 'e800bc35127717cfeccbd47cc58a6c7a');
-                        imgbbFormData.append('image', imagePart.inlineData.data);
-                        imgbbFormData.append('name', `ebook-cover-${Date.now()}`);
+                    const imgbbResponse = await fetch('https://api.imgbb.com/1/upload', {
+                        method: 'POST',
+                        body: imgbbFormData,
+                    });
 
-                        const imgbbResponse = await fetch('https://api.imgbb.com/1/upload', {
-                            method: 'POST',
-                            body: imgbbFormData,
-                        });
-
-                        const imgbbData = await imgbbResponse.json();
-                        if (imgbbData?.data?.url) {
-                            coverUrl = imgbbData.data.url;
-                        }
+                    const imgbbData = await imgbbResponse.json();
+                    if (imgbbData?.data?.url) {
+                        coverUrl = imgbbData.data.url;
                     }
+                } catch (imgErr) {
+                    console.warn('Cover upload failed, proceeding without cover:', imgErr);
                 }
-            } catch (imgErr) {
-                console.warn('Cover generation failed, proceeding without cover:', imgErr);
             }
 
             // 2. Convert theme to slug
@@ -100,7 +94,7 @@ export default function AIGenerator() {
                 slug: slug,
                 description: `Ebook criado por Inteligência Artificial focado em ${audience}.`,
                 theme_color: 'indigo',
-                cover_url: coverUrl || null
+                cover_url: coverUrl
             }]).select().single();
 
             if (ebookError) throw ebookError;
@@ -209,6 +203,53 @@ export default function AIGenerator() {
                                     placeholder="Comece digitando ou cole o seu documento aqui..."
                                     className="w-full h-48 sm:h-64 bg-zinc-900/50 border border-zinc-700 rounded-xl p-4 text-zinc-300 focus:ring-2 focus:ring-indigo-500 resize-none transition-shadow"
                                 />
+                            </div>
+
+                            {/* Cover Upload */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-bold text-zinc-300 mb-2">
+                                    <ImagePlus className="w-4 h-4 text-indigo-400" />
+                                    Capa do Ebook (Opcional)
+                                </label>
+                                <div className="flex items-center gap-4">
+                                    <label className="flex-1 cursor-pointer">
+                                        <div className={`flex items-center justify-center gap-3 border-2 border-dashed rounded-xl p-4 transition-colors ${coverFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-700 hover:border-indigo-500'}`}>
+                                            {coverPreview ? (
+                                                <img src={coverPreview} alt="Preview" className="w-16 h-24 object-cover rounded-lg" />
+                                            ) : (
+                                                <ImagePlus className="w-8 h-8 text-zinc-500" />
+                                            )}
+                                            <div>
+                                                <p className="text-sm font-medium text-zinc-300">{coverFile ? coverFile.name : 'Clique para escolher uma imagem'}</p>
+                                                <p className="text-xs text-zinc-500">PNG, JPG ou WebP</p>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0] || null;
+                                                setCoverFile(file);
+                                                if (file) {
+                                                    const url = URL.createObjectURL(file);
+                                                    setCoverPreview(url);
+                                                } else {
+                                                    setCoverPreview(null);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                    {coverFile && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setCoverFile(null); setCoverPreview(null); }}
+                                            className="text-red-400 hover:text-red-300 text-sm font-medium px-3 py-2 hover:bg-red-400/10 rounded-lg transition-colors"
+                                        >
+                                            Remover
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <button

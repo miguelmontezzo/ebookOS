@@ -279,64 +279,70 @@ export default function AdminEbookManager() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-700/30">
-                                    {(EBOOK_MODULES[ebook.slug] || []).map((moduloNome: string) => {
-                                        const regraAtual = regras.find(r => r.modulo_nome === moduloNome);
-                                        const valorDias = regraAtual ? regraAtual.dias_liberacao : 0;
+                                    {(() => {
+                                        // Use hardcoded modules from config, OR fallback to regras from database for AI ebooks
+                                        const moduleList = EBOOK_MODULES[ebook.slug] || regras.map((r: any) => r.modulo_nome);
+                                        if (moduleList.length === 0) {
+                                            return (
+                                                <tr>
+                                                    <td colSpan={3} className="px-6 py-8 text-center text-zinc-500">
+                                                        Nenhum módulo configurado para este ebook.
+                                                    </td>
+                                                </tr>
+                                            );
+                                        }
+                                        return moduleList.map((moduloNome: string) => {
+                                            const regraAtual = regras.find(r => r.modulo_nome === moduloNome);
+                                            const valorDias = regraAtual ? regraAtual.dias_liberacao : 0;
 
-                                        const handleDiasChange = async (novosDias: number) => {
-                                            if (novosDias <= 0 && regraAtual) {
-                                                const { error } = await supabase.from('modulos_regras').delete().eq('id', regraAtual.id);
-                                                if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
-                                                await fetchRegras();
-                                            } else if (novosDias > 0) {
-                                                if (regraAtual) {
-                                                    const { error } = await supabase.from('modulos_regras').update({ dias_liberacao: novosDias }).eq('id', regraAtual.id);
+                                            const handleDiasChange = async (novosDias: number) => {
+                                                if (novosDias <= 0 && regraAtual) {
+                                                    const { error } = await supabase.from('modulos_regras').delete().eq('id', regraAtual.id);
                                                     if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
-                                                } else {
-                                                    const { error } = await supabase.from('modulos_regras').insert([
-                                                        { ebook_id: id, modulo_nome: moduloNome, dias_liberacao: novosDias }
-                                                    ]);
-                                                    if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
+                                                    await fetchRegras();
+                                                } else if (novosDias > 0) {
+                                                    if (regraAtual) {
+                                                        const { error } = await supabase.from('modulos_regras').update({ dias_liberacao: novosDias }).eq('id', regraAtual.id);
+                                                        if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
+                                                    } else {
+                                                        const { error } = await supabase.from('modulos_regras').insert([
+                                                            { ebook_id: id, modulo_nome: moduloNome, dias_liberacao: novosDias }
+                                                        ]);
+                                                        if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
+                                                    }
+                                                    await fetchRegras();
                                                 }
-                                                await fetchRegras();
-                                            }
-                                        };
+                                            };
 
-                                        return (
-                                            <tr key={moduloNome} className="hover:bg-zinc-800/40 transition-colors">
-                                                <td className="px-6 py-4 text-white font-medium flex items-center gap-3">
-                                                    {valorDias > 0 ? <Lock className="w-4 h-4 text-indigo-400" /> : <BookOpen className="w-4 h-4 text-emerald-400" />}
-                                                    {moduloNome}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2 max-w-[160px]">
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            value={valorDias}
-                                                            onChange={(e) => handleDiasChange(parseInt(e.target.value) || 0)}
-                                                            className="w-20 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white focus:ring-indigo-500 focus:border-indigo-500"
-                                                        />
-                                                        <span className="text-zinc-500 text-sm whitespace-nowrap">dias</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    {valorDias > 0 ? (
-                                                        <span className="text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/20">Bloqueado no Dia 0</span>
-                                                    ) : (
-                                                        <span className="text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">Livre</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {(!EBOOK_MODULES[ebook.slug] || EBOOK_MODULES[ebook.slug].length === 0) && (
-                                        <tr>
-                                            <td colSpan={3} className="px-6 py-8 text-center text-zinc-500">
-                                                Nenhum módulo configurado dinamicamente para este ebook.
-                                            </td>
-                                        </tr>
-                                    )}
+                                            return (
+                                                <tr key={moduloNome} className="hover:bg-zinc-800/40 transition-colors">
+                                                    <td className="px-6 py-4 text-white font-medium flex items-center gap-3">
+                                                        {valorDias > 0 ? <Lock className="w-4 h-4 text-indigo-400" /> : <BookOpen className="w-4 h-4 text-emerald-400" />}
+                                                        {moduloNome}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 max-w-[160px]">
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                value={valorDias}
+                                                                onChange={(e) => handleDiasChange(parseInt(e.target.value) || 0)}
+                                                                className="w-20 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white focus:ring-indigo-500 focus:border-indigo-500"
+                                                            />
+                                                            <span className="text-zinc-500 text-sm whitespace-nowrap">dias</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        {valorDias > 0 ? (
+                                                            <span className="text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/20">Bloqueado no Dia 0</span>
+                                                        ) : (
+                                                            <span className="text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">Livre</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        });
+                                    })()}
                                 </tbody>
                             </table>
                         </div>
