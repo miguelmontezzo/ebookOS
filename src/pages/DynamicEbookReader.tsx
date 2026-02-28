@@ -213,8 +213,8 @@ export default function DynamicEbookReader() {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col h-screen overflow-hidden">
-                {/* Header */}
-                <header className="bg-white border-b border-zinc-200 h-16 flex items-center justify-between px-4 md:px-8 shrink-0">
+                {/* Header - Always fixed on top */}
+                <header className="bg-white border-b border-zinc-200 h-14 md:h-16 flex items-center justify-between px-3 md:px-8 shrink-0 sticky top-0 z-30">
                     <div className="flex items-center gap-4">
                         <button
                             className="md:hidden p-2 -ml-2 text-zinc-600 hover:bg-zinc-100 rounded-lg"
@@ -263,9 +263,9 @@ export default function DynamicEbookReader() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
-                            className="min-h-full pb-32"
+                            className="min-h-full pb-20 md:pb-32"
                         >
-                            <article className={`max-w-3xl md:mx-auto mt-8 md:mt-16 px-6 prose prose-zinc prose-h1:font-black prose-h1:text-3xl md:prose-h1:text-4xl prose-h2:font-bold prose-h2:text-2xl prose-h3:text-xl prose-p:text-zinc-600 prose-p:leading-relaxed prose-a:text-${ebookData.theme_color || 'indigo'}-600 hover:prose-a:text-${ebookData.theme_color || 'indigo'}-700 prose-blockquote:border-${ebookData.theme_color || 'indigo'}-200 prose-blockquote:bg-${ebookData.theme_color || 'indigo'}-50/50 prose-blockquote:text-${ebookData.theme_color || 'indigo'}-900 prose-blockquote:font-medium prose-blockquote:py-1 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-li:text-zinc-600`}>
+                            <article className={`max-w-3xl md:mx-auto mt-4 md:mt-16 px-4 md:px-6 prose prose-sm md:prose-base prose-zinc prose-h1:font-black prose-h1:text-2xl md:prose-h1:text-4xl prose-h2:font-bold prose-h2:text-xl md:prose-h2:text-2xl prose-h3:text-lg md:prose-h3:text-xl prose-p:text-zinc-600 prose-p:leading-relaxed prose-a:text-${ebookData.theme_color || 'indigo'}-600 hover:prose-a:text-${ebookData.theme_color || 'indigo'}-700 prose-blockquote:border-${ebookData.theme_color || 'indigo'}-200 prose-blockquote:bg-${ebookData.theme_color || 'indigo'}-50/50 prose-blockquote:text-${ebookData.theme_color || 'indigo'}-900 prose-blockquote:font-medium prose-blockquote:py-1 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-li:text-zinc-600 [&_.min-h-\[70vh\]]:min-h-[50vh] [&_.min-h-\[70vh\]]:md:min-h-[70vh] [&_.min-h-\[80vh\]]:min-h-[50vh] [&_.min-h-\[80vh\]]:md:min-h-[80vh] [&_.text-5xl]:text-3xl [&_.text-5xl]:md:text-5xl [&_.text-7xl]:text-4xl [&_.text-7xl]:md:text-7xl [&_.grid]:gap-3 [&_.grid]:md:gap-6 [&_table]:text-xs [&_table]:md:text-sm`}>
                                 <h1>{currentPage.title}</h1>
 
                                 <div className="mt-8 text-lg">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { generateEbookContent, GeneratedModule } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
+import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { useAdminAuth } from '../contexts/AuthAdminContext';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Loader2, ArrowLeft, BookOpen, Layers, Type, CheckCircle, ImagePlus } from 'lucide-react';
@@ -45,39 +46,11 @@ export default function AIGenerator() {
         setError(null);
 
         try {
-            // 1. Upload cover image to ImgBB if provided
+            // 1. Upload cover image to Supabase Storage if provided
             let coverUrl: string | null = null;
             if (coverFile) {
                 setGenerationStep('☁️ Fazendo upload da capa...');
-                try {
-                    const reader = new FileReader();
-                    const base64 = await new Promise<string>((resolve, reject) => {
-                        reader.onload = () => {
-                            const result = reader.result as string;
-                            // Remove the data:image/...;base64, prefix
-                            resolve(result.split(',')[1]);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(coverFile);
-                    });
-
-                    const imgbbFormData = new FormData();
-                    imgbbFormData.append('key', 'e800bc35127717cfeccbd47cc58a6c7a');
-                    imgbbFormData.append('image', base64);
-                    imgbbFormData.append('name', `ebook-cover-${Date.now()}`);
-
-                    const imgbbResponse = await fetch('https://api.imgbb.com/1/upload', {
-                        method: 'POST',
-                        body: imgbbFormData,
-                    });
-
-                    const imgbbData = await imgbbResponse.json();
-                    if (imgbbData?.data?.url) {
-                        coverUrl = imgbbData.data.url;
-                    }
-                } catch (imgErr) {
-                    console.warn('Cover upload failed, proceeding without cover:', imgErr);
-                }
+                coverUrl = await uploadCoverToSupabase(coverFile);
             }
 
             // 2. Convert theme to slug

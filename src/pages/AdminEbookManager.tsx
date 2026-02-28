@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Users, Lock, ChevronLeft, Plus, Trash2, Save, Loader2, BookOpen, Settings, Dices } from 'lucide-react';
+import { uploadCoverToSupabase } from '../lib/uploadCover';
+import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 
 export default function AdminEbookManager() {
@@ -27,6 +28,9 @@ export default function AdminEbookManager() {
     const [editDescription, setEditDescription] = useState('');
     const [editCover, setEditCover] = useState('');
     const [isSavingSettings, setIsSavingSettings] = useState(false);
+    const [coverFileSettings, setCoverFileSettings] = useState<File | null>(null);
+    const [coverPreviewSettings, setCoverPreviewSettings] = useState<string | null>(null);
+    const [isUploadingCover, setIsUploadingCover] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -280,7 +284,6 @@ export default function AdminEbookManager() {
                                 </thead>
                                 <tbody className="divide-y divide-zinc-700/30">
                                     {(() => {
-                                        // Use hardcoded modules from config, OR fallback to regras from database for AI ebooks
                                         const moduleList = EBOOK_MODULES[ebook.slug] || regras.map((r: any) => r.modulo_nome);
                                         if (moduleList.length === 0) {
                                             return (
@@ -296,22 +299,15 @@ export default function AdminEbookManager() {
                                             const valorDias = regraAtual ? regraAtual.dias_liberacao : 0;
 
                                             const handleDiasChange = async (novosDias: number) => {
-                                                if (novosDias <= 0 && regraAtual) {
-                                                    const { error } = await supabase.from('modulos_regras').delete().eq('id', regraAtual.id);
-                                                    if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
-                                                    await fetchRegras();
-                                                } else if (novosDias > 0) {
-                                                    if (regraAtual) {
-                                                        const { error } = await supabase.from('modulos_regras').update({ dias_liberacao: novosDias }).eq('id', regraAtual.id);
-                                                        if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
-                                                    } else {
-                                                        const { error } = await supabase.from('modulos_regras').insert([
-                                                            { ebook_id: id, modulo_nome: moduloNome, dias_liberacao: novosDias }
-                                                        ]);
-                                                        if (error) alert("Erro ao salvar Drip: Execute o script SQL para definir a segurança (owner_id).");
-                                                    }
-                                                    await fetchRegras();
+                                                const dias = Math.max(0, novosDias);
+                                                if (regraAtual) {
+                                                    await supabase.from('modulos_regras').update({ dias_liberacao: dias }).eq('id', regraAtual.id);
+                                                } else {
+                                                    await supabase.from('modulos_regras').insert([
+                                                        { ebook_id: id, modulo_nome: moduloNome, dias_liberacao: dias }
+                                                    ]);
                                                 }
+                                                await fetchRegras();
                                             };
 
                                             return (
@@ -321,15 +317,30 @@ export default function AdminEbookManager() {
                                                         {moduloNome}
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 max-w-[160px]">
+                                                        <div className="flex items-center gap-1 max-w-[200px]">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDiasChange(valorDias - 1)}
+                                                                disabled={valorDias <= 0}
+                                                                className="p-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                            >
+                                                                <Minus className="w-4 h-4" />
+                                                            </button>
                                                             <input
                                                                 type="number"
                                                                 min="0"
                                                                 value={valorDias}
                                                                 onChange={(e) => handleDiasChange(parseInt(e.target.value) || 0)}
-                                                                className="w-20 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white focus:ring-indigo-500 focus:border-indigo-500"
+                                                                className="w-16 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-center text-white focus:ring-indigo-500 focus:border-indigo-500"
                                                             />
-                                                            <span className="text-zinc-500 text-sm whitespace-nowrap">dias</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDiasChange(valorDias + 1)}
+                                                                className="p-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors"
+                                                            >
+                                                                <Plus className="w-4 h-4" />
+                                                            </button>
+                                                            <span className="text-zinc-500 text-sm whitespace-nowrap ml-1">dias</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
@@ -378,18 +389,54 @@ export default function AdminEbookManager() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-zinc-300 mb-2">URL da Capa (Imagem)</label>
+                                    <label className="block text-sm font-medium text-zinc-300 mb-2">Capa do Ebook</label>
+
+                                    {/* File Upload */}
+                                    <label className="block cursor-pointer mb-3">
+                                        <div className={`flex items-center justify-center gap-3 border-2 border-dashed rounded-xl p-4 transition-colors ${coverFileSettings ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-700 hover:border-amber-500'}`}>
+                                            {coverPreviewSettings ? (
+                                                <img src={coverPreviewSettings} alt="Preview" className="w-16 h-24 object-cover rounded-lg" />
+                                            ) : editCover ? (
+                                                <img src={editCover} alt="Preview" className="w-16 h-24 object-cover rounded-lg" />
+                                            ) : (
+                                                <ImagePlus className="w-8 h-8 text-zinc-500" />
+                                            )}
+                                            <div>
+                                                <p className="text-sm font-medium text-zinc-300">{coverFileSettings ? coverFileSettings.name : 'Clique para enviar uma nova capa'}</p>
+                                                <p className="text-xs text-zinc-500">PNG, JPG ou WebP</p>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp"
+                                            className="hidden"
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0] || null;
+                                                setCoverFileSettings(file);
+                                                if (file) {
+                                                    setCoverPreviewSettings(URL.createObjectURL(file));
+                                                    setIsUploadingCover(true);
+                                                    const url = await uploadCoverToSupabase(file);
+                                                    if (url) {
+                                                        setEditCover(url);
+                                                    }
+                                                    setIsUploadingCover(false);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                    {isUploadingCover && (
+                                        <div className="flex items-center gap-2 text-sm text-amber-400 mb-3">
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Enviando imagem...
+                                        </div>
+                                    )}
+
+                                    {/* URL Input (manual) */}
                                     <input
                                         type="url" value={editCover} onChange={e => setEditCover(e.target.value)}
                                         className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-amber-500 focus:border-amber-500"
-                                        placeholder="https://images.unsplash.com/..."
+                                        placeholder="Ou cole uma URL diretamente..."
                                     />
-                                    {editCover && (
-                                        <div className="mt-4 shrink-0">
-                                            <p className="text-xs text-zinc-500 mb-2">Preview da Capa:</p>
-                                            <img src={editCover} alt="Preview" className="w-32 h-44 object-cover rounded-lg border border-zinc-700/50" />
-                                        </div>
-                                    )}
                                 </div>
 
                                 <button disabled={isSavingSettings} type="submit" className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold px-8 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
