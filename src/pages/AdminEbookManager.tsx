@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
@@ -31,6 +31,8 @@ export default function AdminEbookManager() {
     const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
     const [selectedPageIndex, setSelectedPageIndex] = useState(0);
     const [isSavingContent, setIsSavingContent] = useState(false);
+    const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+    const editorRef = useRef<HTMLDivElement | null>(null);
 
     // Config State
     const [editTitle, setEditTitle] = useState('');
@@ -231,6 +233,25 @@ export default function AdminEbookManager() {
             };
         }));
     };
+
+    const runEditorCommand = (command: string, value?: string) => {
+        if (!editorRef.current) return;
+        editorRef.current.focus();
+        document.execCommand(command, false, value);
+        updatePageContent(
+            selectedModuleIndex,
+            selectedPageIndex,
+            editorRef.current.innerHTML
+        );
+    };
+
+    useEffect(() => {
+        if (isAdvancedMode) return;
+        const html = contentModules?.[selectedModuleIndex]?.pages?.[selectedPageIndex]?.content || '';
+        if (editorRef.current && editorRef.current.innerHTML !== html) {
+            editorRef.current.innerHTML = html;
+        }
+    }, [contentModules, selectedModuleIndex, selectedPageIndex, isAdvancedMode]);
 
     const handleSaveContent = async () => {
         if (!id) return;
@@ -536,12 +557,41 @@ export default function AdminEbookManager() {
                                     )}
 
                                     <div>
-                                        <label className="block text-xs text-zinc-400 mb-1">Conteúdo da página (HTML)</label>
-                                        <textarea
-                                            value={contentModules?.[selectedModuleIndex]?.pages?.[selectedPageIndex]?.content || ''}
-                                            onChange={(e) => updatePageContent(selectedModuleIndex, selectedPageIndex, e.target.value)}
-                                            className="w-full h-[420px] bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 font-mono text-xs"
-                                        />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-xs text-zinc-400">Conteúdo da página</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsAdvancedMode((v) => !v)}
+                                                className="text-xs px-3 py-1 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-700/40"
+                                            >
+                                                {isAdvancedMode ? 'Modo simples' : 'Modo avançado (HTML)'}
+                                            </button>
+                                        </div>
+
+                                        {!isAdvancedMode ? (
+                                            <div className="space-y-2">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <button type="button" onClick={() => runEditorCommand('bold')} className="px-2 py-1 text-xs rounded bg-zinc-700 text-white">Negrito</button>
+                                                    <button type="button" onClick={() => runEditorCommand('italic')} className="px-2 py-1 text-xs rounded bg-zinc-700 text-white">Itálico</button>
+                                                    <button type="button" onClick={() => runEditorCommand('formatBlock', 'h3')} className="px-2 py-1 text-xs rounded bg-zinc-700 text-white">Título</button>
+                                                    <button type="button" onClick={() => runEditorCommand('insertUnorderedList')} className="px-2 py-1 text-xs rounded bg-zinc-700 text-white">Lista</button>
+                                                    <button type="button" onClick={() => runEditorCommand('formatBlock', 'blockquote')} className="px-2 py-1 text-xs rounded bg-zinc-700 text-white">Citação</button>
+                                                </div>
+                                                <div
+                                                    ref={editorRef}
+                                                    contentEditable
+                                                    suppressContentEditableWarning
+                                                    onInput={(e) => updatePageContent(selectedModuleIndex, selectedPageIndex, (e.currentTarget as HTMLDivElement).innerHTML)}
+                                                    className="w-full min-h-[420px] bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 text-sm outline-none"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <textarea
+                                                value={contentModules?.[selectedModuleIndex]?.pages?.[selectedPageIndex]?.content || ''}
+                                                onChange={(e) => updatePageContent(selectedModuleIndex, selectedPageIndex, e.target.value)}
+                                                className="w-full h-[420px] bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-200 font-mono text-xs"
+                                            />
+                                        )}
                                     </div>
 
                                     <button
