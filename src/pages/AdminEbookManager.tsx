@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { generateCoverImageFile } from '../lib/coverGenerator';
-import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus, Send } from 'lucide-react';
+import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus, MessageCircle } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 import ColorPicker from '../components/ColorPicker';
 
@@ -18,7 +18,6 @@ export default function AdminEbookManager() {
     const [newEmail, setNewEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [isAddingAluno, setIsAddingAluno] = useState(false);
-    const [sendingForAlunoId, setSendingForAlunoId] = useState<string | null>(null);
 
     // Regras State
     const [regras, setRegras] = useState<any[]>([]);
@@ -125,28 +124,17 @@ export default function AdminEbookManager() {
         await fetchAlunos();
     };
 
-    const handleShareAccess = async (aluno: any) => {
+    const handleShareAccess = (aluno: any) => {
         if (!ebook?.slug) return;
-        setSendingForAlunoId(aluno.id);
-        try {
-            const loginUrl = `${window.location.origin}/${ebook.slug}/login`;
-            const { error } = await supabase.functions.invoke('share-student-access', {
-                body: {
-                    to: aluno.email,
-                    alunoEmail: aluno.email,
-                    alunoPassword: aluno.password,
-                    loginUrl,
-                    ebookTitle: ebook.title
-                }
-            });
 
-            if (error) throw error;
-            alert(`Acesso enviado para ${aluno.email}`);
-        } catch (err: any) {
-            alert(`Erro ao enviar e-mail: ${err?.message || 'falha inesperada'}`);
-        } finally {
-            setSendingForAlunoId(null);
-        }
+        const loginUrl = `${window.location.origin}/${ebook.slug}/login`;
+        const msg = `🚀 Acesso liberado ao ${ebook.title}%0A%0A` +
+            `📧 Login: ${aluno.email}%0A` +
+            `🔒 Senha: ${aluno.password}%0A%0A` +
+            `👉 Entrar agora: ${loginUrl}`;
+
+        const waUrl = `https://wa.me/?text=${msg}`;
+        window.open(waUrl, '_blank');
     };
 
     const handleAddRegra = async (e: React.FormEvent) => {
@@ -408,11 +396,10 @@ export default function AdminEbookManager() {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => handleShareAccess(aluno)}
-                                                        disabled={sendingForAlunoId === aluno.id}
-                                                        className="text-emerald-400 hover:text-emerald-300 p-2 hover:bg-emerald-400/10 rounded-lg transition-colors disabled:opacity-50"
-                                                        title="Compartilhar acesso por e-mail"
+                                                        className="text-emerald-400 hover:text-emerald-300 p-2 hover:bg-emerald-400/10 rounded-lg transition-colors"
+                                                        title="Compartilhar acesso por WhatsApp"
                                                     >
-                                                        {sendingForAlunoId === aluno.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                                        <MessageCircle className="w-5 h-5" />
                                                     </button>
                                                     <button onClick={() => handleRemoverAluno(aluno.id)} className="text-red-400 hover:text-red-300 p-2 hover:bg-red-400/10 rounded-lg transition-colors">
                                                         <Trash2 className="w-5 h-5" />
