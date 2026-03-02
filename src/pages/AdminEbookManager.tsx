@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { generateCoverImageFile } from '../lib/coverGenerator';
-import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus } from 'lucide-react';
+import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus, Send } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 import ColorPicker from '../components/ColorPicker';
 
@@ -18,6 +18,7 @@ export default function AdminEbookManager() {
     const [newEmail, setNewEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [isAddingAluno, setIsAddingAluno] = useState(false);
+    const [sendingForAlunoId, setSendingForAlunoId] = useState<string | null>(null);
 
     // Regras State
     const [regras, setRegras] = useState<any[]>([]);
@@ -122,6 +123,30 @@ export default function AdminEbookManager() {
         if (!confirm('Remover o acesso deste aluno ao Ebook?')) return;
         await supabase.from('alunos').delete().eq('id', alunoId);
         await fetchAlunos();
+    };
+
+    const handleShareAccess = async (aluno: any) => {
+        if (!ebook?.slug) return;
+        setSendingForAlunoId(aluno.id);
+        try {
+            const loginUrl = `${window.location.origin}/${ebook.slug}/login`;
+            const { error } = await supabase.functions.invoke('share-student-access', {
+                body: {
+                    to: aluno.email,
+                    alunoEmail: aluno.email,
+                    alunoPassword: aluno.password,
+                    loginUrl,
+                    ebookTitle: ebook.title
+                }
+            });
+
+            if (error) throw error;
+            alert(`Acesso enviado para ${aluno.email}`);
+        } catch (err: any) {
+            alert(`Erro ao enviar e-mail: ${err?.message || 'falha inesperada'}`);
+        } finally {
+            setSendingForAlunoId(null);
+        }
     };
 
     const handleAddRegra = async (e: React.FormEvent) => {
@@ -368,7 +393,7 @@ export default function AdminEbookManager() {
                                         <th className="px-6 py-4 font-medium">Email</th>
                                         <th className="px-6 py-4 font-medium">Senha (Exibida)</th>
                                         <th className="px-6 py-4 font-medium">Data da Compra</th>
-                                        <th className="px-6 py-4 font-medium text-right">Ação</th>
+                                        <th className="px-6 py-4 font-medium text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-700/30">
@@ -380,9 +405,19 @@ export default function AdminEbookManager() {
                                                 {new Date(aluno.data_compra).toLocaleDateString('pt-BR')}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <button onClick={() => handleRemoverAluno(aluno.id)} className="text-red-400 hover:text-red-300 p-2 hover:bg-red-400/10 rounded-lg transition-colors">
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => handleShareAccess(aluno)}
+                                                        disabled={sendingForAlunoId === aluno.id}
+                                                        className="text-emerald-400 hover:text-emerald-300 p-2 hover:bg-emerald-400/10 rounded-lg transition-colors disabled:opacity-50"
+                                                        title="Compartilhar acesso por e-mail"
+                                                    >
+                                                        {sendingForAlunoId === aluno.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                                    </button>
+                                                    <button onClick={() => handleRemoverAluno(aluno.id)} className="text-red-400 hover:text-red-300 p-2 hover:bg-red-400/10 rounded-lg transition-colors">
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
