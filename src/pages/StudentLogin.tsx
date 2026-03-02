@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useStudentAuth } from '../contexts/AuthStudentContext';
 import { Lock, Loader2, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -7,6 +7,7 @@ import Logo from '../components/Logo';
 
 export default function StudentLogin() {
     const { slug } = useParams();
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -26,6 +27,34 @@ export default function StudentLogin() {
         }
         fetchTitle();
     }, [slug]);
+
+    useEffect(() => {
+        const qpEmail = searchParams.get('email') || '';
+        const qpPassword = searchParams.get('password') || '';
+        if (qpEmail) setEmail(qpEmail);
+        if (qpPassword) setPassword(qpPassword);
+    }, [searchParams]);
+
+    useEffect(() => {
+        const shouldAutoLogin = searchParams.get('autologin') === '1';
+        const qpEmail = searchParams.get('email') || '';
+        const qpPassword = searchParams.get('password') || '';
+
+        if (!shouldAutoLogin || !slug || !qpEmail || !qpPassword) return;
+
+        const run = async () => {
+            setIsSubmitting(true);
+            setError('');
+            const result = await loginStudent(qpEmail, qpPassword, slug);
+            if (result.success) navigate(`/${slug}`);
+            else {
+                setError(result.error || 'Falha no login automático.');
+                setIsSubmitting(false);
+            }
+        };
+
+        run();
+    }, [searchParams, slug, loginStudent, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -137,6 +137,16 @@ export default function AdminEbookManager() {
         window.open(waUrl, '_blank');
     };
 
+    const handleQuickLogin = (aluno: any) => {
+        if (!ebook?.slug) return;
+        const params = new URLSearchParams({
+            email: aluno.email,
+            password: aluno.password,
+            autologin: '1'
+        });
+        window.open(`${window.location.origin}/${ebook.slug}/login?${params.toString()}`, '_blank');
+    };
+
     const handleCopyAccess = async (aluno: any) => {
         if (!ebook?.slug) return;
         await navigator.clipboard.writeText(buildAccessMessage(aluno));
@@ -414,6 +424,13 @@ export default function AdminEbookManager() {
                                                         title="Compartilhar acesso por WhatsApp"
                                                     >
                                                         <MessageCircle className="w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleQuickLogin(aluno)}
+                                                        className="text-amber-400 hover:text-amber-300 p-2 hover:bg-amber-400/10 rounded-lg transition-colors"
+                                                        title="Abrir ebook logado neste usuário"
+                                                    >
+                                                        <Lock className="w-5 h-5" />
                                                     </button>
                                                     <button onClick={() => handleRemoverAluno(aluno.id)} className="text-red-400 hover:text-red-300 p-2 hover:bg-red-400/10 rounded-lg transition-colors">
                                                         <Trash2 className="w-5 h-5" />

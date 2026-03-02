@@ -102,6 +102,18 @@ export default function AIGenerator() {
             const { error: rulesError } = await supabase.from('modulos_regras').insert(rules);
             if (rulesError) throw rulesError;
 
+            // 5. Cria acesso padrão para o autor do ebook
+            if (user.email) {
+                const { error: alunoOwnerError } = await supabase.from('alunos').insert([{
+                    ebook_id: ebookData.id,
+                    email: user.email,
+                    password: 'admin123'
+                }]);
+                if (alunoOwnerError) {
+                    console.warn('Não foi possível criar acesso padrão do autor:', alunoOwnerError.message);
+                }
+            }
+
             navigate('/admin/dashboard');
 
         } catch (err: any) {
