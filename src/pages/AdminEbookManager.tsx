@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { uploadCoverToSupabase } from '../lib/uploadCover';
 import { generateCoverImageFile } from '../lib/coverGenerator';
-import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus, MessageCircle } from 'lucide-react';
+import { Users, Lock, ChevronLeft, Plus, Minus, Trash2, Save, Loader2, BookOpen, Settings, Dices, ImagePlus, MessageCircle, Copy, Check } from 'lucide-react';
 import { EBOOK_MODULES } from '../config/ebookModules';
 import ColorPicker from '../components/ColorPicker';
 
@@ -18,6 +18,7 @@ export default function AdminEbookManager() {
     const [newEmail, setNewEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [isAddingAluno, setIsAddingAluno] = useState(false);
+    const [copiedAlunoId, setCopiedAlunoId] = useState<string | null>(null);
 
     // Regras State
     const [regras, setRegras] = useState<any[]>([]);
@@ -124,17 +125,23 @@ export default function AdminEbookManager() {
         await fetchAlunos();
     };
 
+    const buildAccessMessage = (aluno: any) => {
+        const loginUrl = `${window.location.origin}/${ebook.slug}/login`;
+        return `🚀 Acesso liberado ao ${ebook.title}\n\n📧 Login: ${aluno.email}\n🔒 Senha: ${aluno.password}\n\n👉 Entrar agora: ${loginUrl}`;
+    };
+
     const handleShareAccess = (aluno: any) => {
         if (!ebook?.slug) return;
-
-        const loginUrl = `${window.location.origin}/${ebook.slug}/login`;
-        const msg = `🚀 Acesso liberado ao ${ebook.title}%0A%0A` +
-            `📧 Login: ${aluno.email}%0A` +
-            `🔒 Senha: ${aluno.password}%0A%0A` +
-            `👉 Entrar agora: ${loginUrl}`;
-
+        const msg = encodeURIComponent(buildAccessMessage(aluno));
         const waUrl = `https://wa.me/?text=${msg}`;
         window.open(waUrl, '_blank');
+    };
+
+    const handleCopyAccess = async (aluno: any) => {
+        if (!ebook?.slug) return;
+        await navigator.clipboard.writeText(buildAccessMessage(aluno));
+        setCopiedAlunoId(aluno.id);
+        setTimeout(() => setCopiedAlunoId(null), 1800);
     };
 
     const handleAddRegra = async (e: React.FormEvent) => {
@@ -394,6 +401,13 @@ export default function AdminEbookManager() {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => handleCopyAccess(aluno)}
+                                                        className="text-cyan-400 hover:text-cyan-300 p-2 hover:bg-cyan-400/10 rounded-lg transition-colors"
+                                                        title="Copiar dados de acesso"
+                                                    >
+                                                        {copiedAlunoId === aluno.id ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                                                    </button>
                                                     <button
                                                         onClick={() => handleShareAccess(aluno)}
                                                         className="text-emerald-400 hover:text-emerald-300 p-2 hover:bg-emerald-400/10 rounded-lg transition-colors"
